@@ -45,6 +45,9 @@ namespace BookStore.Service
                 if (model == null) throw new CrudException(HttpStatusCode.BadRequest, "Input Invalid", "");
                 var user=_unitOfWork.Repository<User>().GetAll().FirstOrDefault(a=>a.UserId==userId);
                 if(user== null) throw new CrudException(HttpStatusCode.NotFound, "User Not Found", "");
+                var order = _unitOfWork.Repository<OrderBook>().GetAll().Where(a => a.UserId == userId 
+                && a.Status==1 && a.OrderReturnDate<DateTime.Now);
+                if (!order.IsNullOrEmpty()) throw new CrudException(HttpStatusCode.BadRequest, "", "");
                 OrderReponseModel response = new OrderReponseModel()
                 {
                    OrderDate = DateTime.Now,
@@ -58,6 +61,7 @@ namespace BookStore.Service
                 foreach (var item in model)
                 {
                     var book = _unitOfWork.Repository<Book>().GetAll().FirstOrDefault(x => x.BookId == item.BookId);
+                    if (item.Quantity > book.CurrentQuantity) throw new CrudException(HttpStatusCode.BadRequest, "Information Invalid!", "");
                     var m = _mapper.Map<OrderDetail>(item);
                     m.Price = (item.Quantity * (book.Price));
                     m.OrderId = o.OrderId;
@@ -116,16 +120,24 @@ namespace BookStore.Service
         {
             try
             {
-                var model = _unitOfWork.Repository<OrderBook>().GetAll().Where(a=>a.OrderId==id)
-                    .Include(c => c.User).Include(c=>c.OrderDetails).Select(c => c.OrderDetails
-                    .Select(rs => new OrderDetailReponseModel
-                {
-                    OrderId = rs.OrderId,
-                    BookId = rs.BookId,
-                    OrderDetailId = rs.OrderDetailId,
-                    Price = rs.Price,
-                    Quantity = rs.Quantity
-                })).ToList();
+                var model = _unitOfWork.Repository<OrderBook>().GetAll().Where(a => a.OrderId == id)
+                .Select(a => new OrderReponseModel
+                    {
+                        OrderDate = a.OrderDate,
+                        OrderId = a.OrderId,
+                        OrderReturnDate = a.OrderReturnDate,
+                        Status = a.Status,
+                        UserId = a.UserId,
+                        User = a.User,
+                        OrderDetail = new List<OrderDetailReponseModel>(a.OrderDetails.Select(a => new OrderDetailReponseModel
+                        {
+                            OrderId = a.OrderId,
+                            BookId = a.BookId,
+                            Book = a.Book,
+                            OrderDetailId = a.OrderDetailId,
+                            Price=a.Price,
+                            Quantity=a.Quantity
+                        }))}).SingleOrDefault();
                 if (model == null) throw new CrudException(HttpStatusCode.NotFound, "Order Id Is Not Found", "");
                 return new BaseResponseViewModel<OrderReponseModel>()
                 {
@@ -151,15 +163,26 @@ namespace BookStore.Service
                 var filter = _mapper.Map<OrderReponseModel>(model);
                 filter.SortDirection = request.SortDirection;
                 filter.SortProperty = request.SortProperty;
-                var response = _unitOfWork.Repository<OrderBook>().GetAll().Include(c => c.User).Select(c => c.OrderDetails.Select(rs => new OrderDetailReponseModel
+                var response = _unitOfWork.Repository<OrderBook>().GetAll()
+                .Select(a => new OrderReponseModel
                 {
-                    OrderId = rs.OrderId,
-                    BookId = rs.BookId,
-                    OrderDetailId = rs.OrderDetailId,
-                    Price = rs.Price,
-                    Quantity = rs.Quantity
-                }));
-                var rp= response.ProjectTo<OrderReponseModel>(_mapper.ConfigurationProvider).DynamicFilter(filter).DynamicSort(filter);
+                    OrderDate = a.OrderDate,
+                    OrderId = a.OrderId,
+                    OrderReturnDate = a.OrderReturnDate,
+                    Status = a.Status,
+                    UserId = a.UserId,
+                    User = a.User,
+                    OrderDetail = new List<OrderDetailReponseModel>(a.OrderDetails.Select(a => new OrderDetailReponseModel
+                    {
+                        OrderId = a.OrderId,
+                        BookId = a.BookId,
+                        Book = a.Book,
+                        OrderDetailId = a.OrderDetailId,
+                        Price = a.Price,
+                        Quantity = a.Quantity
+                    }))
+                });
+                var rp= response.DynamicFilter(filter).DynamicSort(filter);
                 if (request.PagingModel == null)
                 {
                     var rs = rp.PagingQueryable(1, 10).Item2;

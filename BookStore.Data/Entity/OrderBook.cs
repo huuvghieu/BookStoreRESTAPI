@@ -11,7 +11,7 @@ public partial class OrderBook
 
     public DateTime OrderReturnDate { get; set; }
 
-    public int? Status { get; set; }
+    public int Status { get; set; }
 
     public int UserId { get; set; }
 
