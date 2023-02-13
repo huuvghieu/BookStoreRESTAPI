@@ -65,7 +65,9 @@ namespace BookStore.Service
                     var m = _mapper.Map<OrderDetail>(item);
                     m.Price = (item.Quantity * (book.Price));
                     m.OrderId = o.OrderId;
+                    o.OrderDetails.ToList().Add(m);
                     await _unitOfWork.Repository<OrderDetail>().CreateAsync(m);
+                    await _unitOfWork.CommitAsync();
                     book.CurrentQuantity = book.CurrentQuantity - item.Quantity;
                     await _unitOfWork.Repository<Book>().Update(book, book.BookId);
                     await _unitOfWork.CommitAsync();

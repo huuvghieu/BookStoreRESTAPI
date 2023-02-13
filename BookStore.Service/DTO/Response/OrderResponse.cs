@@ -20,6 +20,6 @@ namespace BookStore.Service.DTO.Response
 
         public int UserId { get; set; }
 
-        public virtual ICollection<OrderDetail> OrderDetails { get; } = new List<OrderDetail>();
+        public  List<OrderDetail> OrderDetails { get; set; } 
     }
 }
