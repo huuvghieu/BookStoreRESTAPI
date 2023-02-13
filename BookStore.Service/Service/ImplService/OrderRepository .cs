@@ -160,6 +160,18 @@ namespace BookStore.Service
         {
             try
             {
+                if (request.PagingModel == null)
+                {
+                    request.PagingModel = new PagingMetadata();
+                }
+                if (request.PagingModel.Page == 0)
+                {
+                    request.PagingModel.Page = 1;
+                }
+                if (request.PagingModel.Size == 0)
+                {
+                    request.PagingModel.Size = 10;
+                }
                 var filter = _mapper.Map<OrderReponseModel>(model);
                 filter.SortDirection = request.SortDirection;
                 filter.SortProperty = request.SortProperty;
@@ -183,24 +195,12 @@ namespace BookStore.Service
                     }))
                 });
                 var rp= response.DynamicFilter(filter).DynamicSort(filter);
-                if (request.PagingModel == null)
-                {
-                    var rs = rp.PagingQueryable(1, 10).Item2;
-                    return new BaseResponsePagingViewModel<OrderReponseModel>()
-                    {
-                        Data = rs.ToList(),
-                        Metadata = request.PagingModel
-                    };
-                }
-                else
-                {
-                    var result = rp.PagingQueryable(request.PagingModel.Page, request.PagingModel.Size).Item2;
+                 var result = rp.PagingQueryable(request.PagingModel.Page, request.PagingModel.Size).Item2;
                     return new BaseResponsePagingViewModel<OrderReponseModel>()
                     {
                         Data = result.ToList(),
                         Metadata = request.PagingModel
                     };
-                }
             }
             catch (Exception e)
             {

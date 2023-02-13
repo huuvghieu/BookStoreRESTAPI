@@ -166,28 +166,28 @@ namespace BookStore.Service
         {
                 try
                 {
+                if (request.PagingModel == null)
+                {
+                    request.PagingModel = new PagingMetadata();
+                }
+                if (request.PagingModel.Page == 0)
+                {
+                    request.PagingModel.Page = 1;
+                }
+                if (request.PagingModel.Size == 0)
+                {
+                    request.PagingModel.Size = 10;
+                }
                 var filter=_mapper.Map<BookReponseModel>(model);
                 filter.SortDirection = request.SortDirection;
                 filter.SortProperty=request.SortProperty;
                 var response = _unitOfWork.Repository<Book>().GetAll().Include(a=>a.Cate).ProjectTo<BookReponseModel>(_mapper.ConfigurationProvider).DynamicFilter(filter).DynamicSort(filter);
-                if (request.PagingModel == null)
-                {
-                    var rs= response.PagingQueryable(1,10).Item2;
-                    return new BaseResponsePagingViewModel<BookReponseModel>()
-                    {
-                        Data = rs.ToList(),
-                        Metadata = request.PagingModel
-                    };
-                }
-                else
-                {
-                    var result = response.PagingQueryable(request.PagingModel.Page, request.PagingModel.Size).Item2;
+                var result = response.PagingQueryable(request.PagingModel.Page, request.PagingModel.Size).Item2;
                     return new BaseResponsePagingViewModel<BookReponseModel>()
                     {
                         Data = result.ToList(),
                         Metadata = request.PagingModel
                     };
-                }
             }
                 catch (Exception e)
                 {
