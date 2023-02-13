@@ -27,21 +27,28 @@ namespace BookStore.Service.Service.ImplService
             _mapper = mapper;
         }
 
-        public async Task<BaseResponseViewModel<OrderResponse>> ReturnOrder(ReturnOrderRequest returnRequest)
+        public async Task<BaseResponseViewModel<OrderResponse>> ReturnOrder(ReturnOrderRequest returnRequest, int userId)
         {
             try
             {
+                if (returnRequest == null) throw new Exception();
+                var user = _unitOfWork.Repository<User>().GetAll().FirstOrDefault(u => u.UserId == userId);
+                if (user == null) throw new Exception();
                 var orderBook = _unitOfWork.Repository<OrderBook>().GetAll().Include(u => u.OrderDetails)
-                                                        .FirstOrDefault(u => u.OrderId == returnRequest.OrderID && u.UserId == returnRequest.UserID);
+                                                        .FirstOrDefault(u => u.OrderId == returnRequest.OrderID && u.UserId == userId);
+                if(orderBook == null) throw new Exception();
+
                 if (orderBook.Status == (int)StatusType.Status.None)
                 {
                     throw new Exception();
                 }
                 var orderDetailList = orderBook.OrderDetails.ToList();
                 var orderDetail = orderDetailList.FirstOrDefault(u => u.BookId == returnRequest.BookID);
+                if (returnRequest.Quantity > orderDetail.Quantity) throw new Exception();
                 int newQuantity = orderDetail.Quantity - returnRequest.Quantity;
                 var book = _unitOfWork.Repository<Book>().GetAll()
                                                             .FirstOrDefault(u => u.BookId == returnRequest.BookID);
+                if(newQuantity < 0) throw new Exception();
                 if (newQuantity == 0)
                 {
                     orderDetail.Quantity = newQuantity;

@@ -16,9 +16,9 @@ namespace BookStore.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<OrderResponse>> ReturnOrder(ReturnOrderRequest returnOrderRequest)
+        public async Task<ActionResult<OrderResponse>> ReturnOrder(ReturnOrderRequest returnOrderRequest, int userId)
         {
-            var rs = await _returnService.ReturnOrder(returnOrderRequest);
+            var rs = await _returnService.ReturnOrder(returnOrderRequest, userId);
             return Ok(rs);
         }
     }
