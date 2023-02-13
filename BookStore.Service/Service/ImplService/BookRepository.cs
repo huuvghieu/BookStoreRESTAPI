@@ -98,7 +98,7 @@ namespace BookStore.Service
                     sell_number = x.Count()
                 });
                 var order = model.FirstOrDefault(x => x.sell_number == model.Select(x => x.sell_number).Max());
-                var result= _unitOfWork.Repository<Book>().GetAll().Include(c => c.Cate).OrderBy(a => a.BookId).Where(x => x.BookId == order.BookID).ToList();
+                var result= _unitOfWork.Repository<Book>().GetAll().Include(c => c.Cate).OrderBy(c => c.BookId).Where(c => c.BookId == order.BookID).ToList();
                 return new BaseResponseViewModel<List<BookReponseModel>>()
                 {
                     Status = new StatusViewModel()
@@ -121,7 +121,7 @@ namespace BookStore.Service
         {
                 try
                 {
-                    var model = _unitOfWork.Repository<Book>().GetAll().Include(c => c.Cate).FirstOrDefault(a => a.BookId == id);
+                    var model = _unitOfWork.Repository<Book>().GetAll().Include(c => c.Cate).FirstOrDefault(c => c.BookId == id);
                 if (model == null) throw new CrudException(HttpStatusCode.NotFound, "", "");
                 return new BaseResponseViewModel<BookReponseModel>()
                 {
@@ -144,7 +144,7 @@ namespace BookStore.Service
         {
                 try
                 {
-                    var model = _unitOfWork.Repository<Book>().GetAll().Include(c => c.Cate).Where(a => a.CateId == cateId).ToList();
+                    var model = _unitOfWork.Repository<Book>().GetAll().Include(c => c.Cate).Where(c => c.CateId == cateId).ToList();
                 if (model == null) throw new CrudException(HttpStatusCode.NotFound, "", "");
                 return new BaseResponseViewModel<List<BookReponseModel>>()
                 {
@@ -197,7 +197,7 @@ namespace BookStore.Service
         }
         public async Task<BaseResponseViewModel<BookReponseModel>> UpdateBook(int id, BookRequestModel model)
         {
-            var book =  _unitOfWork.Repository<Book>().GetAll().Include(a=>a.Cate).FirstOrDefault(c => c.BookId == id);
+            var book =  _unitOfWork.Repository<Book>().GetAll().Include(a=>a.Cate).FirstOrDefault(a => a.BookId == id);
             if (book == null) throw new CrudException(HttpStatusCode.NotFound, "", "");
                 try
                 {

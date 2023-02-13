@@ -4,7 +4,7 @@ create database BookStore
 GO
 use BookStore
 CREATE TABLE Users(
-	UserID int identity(1,1) primary key not null,
+	UserId int identity(1,1) primary key not null,
 	DateOfBirth datetime not null,
 	Address nvarchar(100),
 	Gender varchar(10),
@@ -15,11 +15,11 @@ CREATE TABLE Users(
 	)
 GO
 CREATE TABLE OrderBooks(
-	OrderID int identity(1,1) primary key not null,
+	OrderId int identity(1,1) primary key not null,
 	OrderDate datetime null ,
 	OrderReturnDate datetime null,
 	Status int not null,
-	UserID int foreign key references Users(UserID )
+	UserId int foreign key references Users(UserId )
 )
 GO
 CREATE TABLE Categories(
@@ -28,7 +28,7 @@ CREATE TABLE Categories(
 )
 GO
 CREATE TABLE Books(
-	BookID int identity(1,1) primary key not null,
+	BookId int identity(1,1) primary key not null,
 	Price int not null,
 	BookImg nvarchar(50) not null,
 	BookName nvarchar(50) not null,
@@ -40,8 +40,8 @@ GO
 
 CREATE TABLE OrderDetails(
 	OrderDetailId int identity(1,1) primary key not null,
-	OrderID int foreign key references OrderBooks(OrderID),
-	BookID int foreign key references Books(BookID),
+	OrderId int foreign key references OrderBooks(OrderId),
+	BookId int foreign key references Books(BookId),
 	Quantity int not null,
 	Price int
 )
@@ -63,13 +63,13 @@ Insert into Books values(75000,'book4.png','Qua dua hau khong lo',20,'Tac pham c
 Insert into Books values(80000,'book5.png','Ethon-Mot Sach Mogu-Xin Moi Ngoi',10,'Hinh anh cac ban dong vat vo cung dang yeu, moi ban deu co mot chiec ghe ngoi yeu thich cua minh. Cac ban nho hay cung quan sat chiec ghe ngoi cua moi ban co diem gu thu vi nhe!',6)
 
 
-Insert into OrderBooks values('2022-10-18 18:00:00','2022-12-18 18:00:00',1,2)
+Insert into OrderBooks values('2023-01-18 18:00:00','2023-03-18 18:00:00',1,2)
 Insert into OrderBooks values('2023-01-09 10:00:00','2023-03-09 10:00:00',1,2)
 Insert into OrderBooks values('2022-10-16 22:00:00','2022-12-16 22:00:00',0,2)
 Insert into OrderBooks values('2022-10-10 18:00:00','2022-12-10 18:00:00',1,3)
 Insert into OrderBooks values('2023-02-07 10:00:00','2023-04-07 10:00:00',1,3)
 Insert into OrderBooks values('2022-09-05 22:00:00','2022-11-05 22:00:00',0,3)
-Insert into OrderBooks values('2022-10-01 18:00:00','2022-12-01 18:00:00',1,4)
+Insert into OrderBooks values('2022-01-01 18:00:00','2022-03-01 18:00:00',1,4)
 Insert into OrderBooks values('2023-02-01 10:00:00','2023-04-01 10:00:00',1,4)
 Insert into OrderBooks values('2022-09-20 22:00:00','2022-11-20 22:00:00',0,4)
 
