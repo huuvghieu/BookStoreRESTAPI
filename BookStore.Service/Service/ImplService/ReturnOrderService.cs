@@ -79,7 +79,7 @@ namespace BookStore.Service.Service.ImplService
             }
             catch(Exception ex)
             {
-                throw new CrudException(HttpStatusCode.BadRequest, "Get Books Paging Error!!!", e.InnerException?.Message);
+                throw new CrudException(HttpStatusCode.BadRequest, "Get Books Paging Error!!!", ex.InnerException?.Message);
             }
         }
     }
