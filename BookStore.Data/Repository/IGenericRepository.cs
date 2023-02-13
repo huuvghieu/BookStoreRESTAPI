@@ -21,7 +21,6 @@ namespace BookStore.Data.Repository
         Task<T> FindAsync(Expression<Func<T, bool>> predicate);
         Task<T> GetById(int id);
         Task Update(T entity, int Id);
-        DbSet<T> GetAll();
 
     }
 }

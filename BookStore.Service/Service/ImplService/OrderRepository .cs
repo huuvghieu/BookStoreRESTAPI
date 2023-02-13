@@ -62,7 +62,7 @@ namespace BookStore.Service
                     m.OrderId = o.OrderId;
                     await _unitOfWork.Repository<OrderDetail>().CreateAsync(m);
                     book.CurrentQuantity = book.CurrentQuantity - item.Quantity;
-                    _unitOfWork.Repository<Book>().UpdateAsync(book, book.BookId);
+                    _unitOfWork.Repository<Book>().Update(book, book.BookId);
                     await _unitOfWork.CommitAsync();
                 }
                 return new BaseResponseViewModel<OrderReponseModel>()
@@ -89,10 +89,10 @@ namespace BookStore.Service
             if (rs == null) throw new CrudException(HttpStatusCode.NotFound, "Order Detail ID Is Not Found", "");
             try
             {
-                await _unitOfWork.Repository<OrderDetail>().RemoveAsync(rs);
+                 _unitOfWork.Repository<OrderDetail>().Delete(rs);
                 var book = _unitOfWork.Repository<Book>().GetAll().FirstOrDefault(x => x.BookId == rs.BookId);
                 book.CurrentQuantity = book.CurrentQuantity + rs.Quantity;
-                _unitOfWork.Repository<Book>().UpdateAsync(book, book.BookId);
+                _unitOfWork.Repository<Book>().Update(book, book.BookId);
                 await _unitOfWork.CommitAsync();
                 return new BaseResponseViewModel<OrderDetailReponseModel>()
                 {
@@ -193,10 +193,10 @@ namespace BookStore.Service
             {
                 var book = _unitOfWork.Repository<Book>().GetAll().FirstOrDefault(x => x.BookId == rs.BookId);
                 book.CurrentQuantity = book.CurrentQuantity - (order.Quantity - rs.Quantity);
-                _unitOfWork.Repository<Book>().UpdateAsync(book, book.BookId);
+                _unitOfWork.Repository<Book>().Update(book, book.BookId);
                 var updateOrder = _mapper.Map<OrderDetailUpdateRequestModel, OrderDetail>(order, rs);
                 updateOrder.Price=book.Price*updateOrder.Quantity;
-                await _unitOfWork.Repository<OrderDetail>().UpdateAsync(updateOrder, id);
+                await _unitOfWork.Repository<OrderDetail>().Update(updateOrder, id);
                 await _unitOfWork.CommitAsync();
                 return new BaseResponseViewModel<OrderDetailReponseModel>()
                 {

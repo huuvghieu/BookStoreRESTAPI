@@ -70,7 +70,7 @@ namespace BookStore.Service
             if (rs == null) throw new CrudException(HttpStatusCode.NotFound, "", ""); 
                 try
                 {
-                    await _unitOfWork.Repository<Book>().RemoveAsync(rs);
+                    _unitOfWork.Repository<Book>().Delete(rs);
                     await _unitOfWork.CommitAsync();
                 return new BaseResponseViewModel<BookReponseModel>()
                 {
@@ -202,7 +202,7 @@ namespace BookStore.Service
                 try
                 {
                     var updateBook = _mapper.Map<BookRequestModel,Book>(model,book);
-                    await _unitOfWork.Repository<Book>().UpdateAsync(updateBook,id);
+                    await _unitOfWork.Repository<Book>().Update(updateBook,id);
                     await _unitOfWork.CommitAsync();
                 return new BaseResponseViewModel<BookReponseModel>()
                 {

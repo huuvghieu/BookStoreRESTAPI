@@ -2,6 +2,7 @@ using BookStore.API.Mapper;
 using BookStore.Data.Models;
 using BookStore.Data.Repository;
 using BookStore.Data.UnitOfWork;
+using BookStore.Service;
 using BookStore.Service.Helper;
 using BookStore.Service.Service.ImplService;
 using BookStore.Service.Service.InterfaceService;
@@ -70,7 +71,7 @@ builder.Services.AddAuthentication(x =>
     });
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-builder.Services.AddAutoMapper(typeof(Mapping));
+builder.Services.AddAutoMapper(typeof(MappingConfig));
 builder.Services.AddControllers().AddJsonOptions(x =>
                 x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
@@ -78,13 +79,11 @@ builder.Services.AddDbContext<BookStoreContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"));
 });
-builder.Services.AddAutoMapper(typeof(MappingConfig));
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IAuthUserService, AuthUserService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReturnOrderService, ReturnOrderService>();
-builder.Services.AddScoped<IOrderService, OrderService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

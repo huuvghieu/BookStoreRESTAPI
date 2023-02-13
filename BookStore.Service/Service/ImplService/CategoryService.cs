@@ -61,6 +61,18 @@ namespace BookStore.Service.Service.ImplService
         {
             try
             {
+                if (pagingRequest.PagingModel == null)
+                {
+                    pagingRequest.PagingModel = new PagingMetadata();
+                }
+                if (pagingRequest.PagingModel.Page == 0)
+                {
+                    pagingRequest.PagingModel.Page = 1;
+                }
+                if (pagingRequest.PagingModel.Size == 0)
+                {
+                    pagingRequest.PagingModel.Size = 10;
+                }
                 var filter = new CategoryResponse();
                 filter.SortDirection = pagingRequest.SortDirection;
                 filter.SortProperty = pagingRequest.SortProperty;
@@ -68,20 +80,21 @@ namespace BookStore.Service.Service.ImplService
                 var rsFilter = _unitOfWork.Repository<Category>().GetAll()
                                 .ProjectTo<CategoryResponse>(_mapper.ConfigurationProvider)
                                 .DynamicSort(filter).DynamicFilter(filter);
-                
 
-                var res = rsFilter.PagingQueryable(pagingRequest.Page, pagingRequest.PageSize);
+                var res = rsFilter.PagingQueryable(pagingRequest.PagingModel.Page, pagingRequest.PagingModel.Size);
 
                 return new BaseResponsePagingViewModel<CategoryResponse>()
                 {
                     Metadata = new PagingMetadata
                     {
-                        Page = pagingRequest.Page,
-                        Size = pagingRequest.PageSize,
+                        Page = pagingRequest.PagingModel.Page,
+                        Size = pagingRequest.PagingModel.Size,
                         Total = res.Item1
                     },
                     Data = res.Item2.ToList()
                 };
+
+
             }
             catch(Exception ex)
             {
