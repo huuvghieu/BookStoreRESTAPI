@@ -1,4 +1,5 @@
 ﻿using BookStore.Data.Models;
+using NTQ.Sdk.Core.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BookStore.Service.DTO.Response
 {
-    public class OrderResponse
+    public class OrderResponse : SortModel
     {
         public int OrderId { get; set; }
 

@@ -19,5 +19,9 @@ public class MappingConfig : Profile
         CreateMap<UserRequest, User>();
 
         CreateMap<OrderResponse, OrderBook>().ReverseMap();
+        CreateMap<OrderDetailResponse, OrderDetail>().ReverseMap();
+        CreateMap<OrderDetailRequest, OrderDetail>();
+
+        CreateMap<BookResponse, Book>().ReverseMap();
     }
 }

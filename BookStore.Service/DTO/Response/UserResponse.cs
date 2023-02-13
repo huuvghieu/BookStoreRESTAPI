@@ -1,4 +1,5 @@
-﻿using NTQ.Sdk.Core.ViewModels;
+﻿using BookStore.Data.Models;
+using NTQ.Sdk.Core.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,5 +23,6 @@ namespace BookStore.Service.DTO.Response
         public string? Password { get; set; }
 
         public string? Email { get; set; }
+        public virtual ICollection<OrderBook> OrderBooks { get; } = new List<OrderBook>();
     }
 }

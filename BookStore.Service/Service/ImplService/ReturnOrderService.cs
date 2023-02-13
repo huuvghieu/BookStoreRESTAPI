@@ -26,31 +26,31 @@ namespace BookStore.Service.Service.ImplService
 
         public async Task<BaseResponseViewModel<OrderResponse>> ReturnOrder(ReturnOrderRequest returnRequest)
         {
-            var orderRequest = await _unitOfWork.Repository<OrderBook>().GetAsync(u => u.OrderId == returnRequest.OrderID 
+            var orderBook = await _unitOfWork.Repository<OrderBook>().GetAsync(u => u.OrderId == returnRequest.OrderID 
                                                                             && u.UserId == returnRequest.UserID);
-            var oderBook = _mapper.Map<OrderBook>(orderRequest);
-            foreach (var item in order.OrderDetails)
+
+            var orderDetailList =  orderBook.OrderDetails.ToList();
+            var orderDetail = orderDetailList.FirstOrDefault(u => u.BookId == returnRequest.BookID);
+            int newQuantity = orderDetail.Quantity - returnRequest.Quantity;
+            if(newQuantity == 0)
             {
-                if(item.BookId == returnRequest.BookID)
-                {
-                    int newQuantity = item.Quantity - returnRequest.Quantity;
-                    if( newQuantity == 0)
-                    {
-                        item.Quantity = newQuantity;
-                        item.Book.CurrentQuantity = item.Book.CurrentQuantity + returnRequest.Quantity;
-                        order.OrderReturnDate = order.OrderReturnDate;
-                        order.Status = (int)StatusType.Status.None;
-                    }
-                    if(newQuantity >=0)
-                    {
-                        item.Quantity = newQuantity;
-                        item.Book.CurrentQuantity = item.Book.CurrentQuantity + returnRequest.Quantity;
-                        order.Status = (int)StatusType.Status.Borrowing;
-                    }
-                }
+                orderDetail.Quantity = newQuantity;
+                orderDetail.Book.CurrentQuantity += returnRequest.Quantity;
+                orderBook.Status = (int)StatusType.Status.None;
+                orderBook.OrderReturnDate = DateTime.Now;
             }
-            var response = _mapper.Map<OrderResponse>(order);
-            await _unitOfWork.Repository<OrderBook>().Update(order, order.OrderId);
+            if(newQuantity >= 0)
+            {
+                orderDetail.Quantity = newQuantity;
+                orderDetail.Book.CurrentQuantity += returnRequest.Quantity;
+                orderBook.Status = (int)StatusType.Status.Borrowing;
+            }
+            var responseOrder = _mapper.Map<OrderResponse>(orderBook);
+            var responesOrderDetail = _mapper.Map<OrderDetailResponse>(orderDetail);
+            var responseBook = _mapper.Map<BookResponse>(orderDetail.Book);
+            await _unitOfWork.Repository<OrderBook>().Update(orderBook, orderBook.OrderId);
+            await _unitOfWork.Repository<OrderDetail>().Update(orderDetail, orderDetail.OrderDetailId);
+            await _unitOfWork.Repository<Book>().Update(orderDetail.Book, orderDetail.Book.BookId);
             await _unitOfWork.CommitAsync();
             return new BaseResponseViewModel<OrderResponse>()
             {
@@ -60,7 +60,7 @@ namespace BookStore.Service.Service.ImplService
                     Message = "success",
                     Success = true,
                 },
-                Data = response
+                Data = responseOrder
             };
         }
     }

@@ -2,6 +2,7 @@ using BookStore.API.Mapper;
 using BookStore.Data.Models;
 using BookStore.Data.Repository;
 using BookStore.Data.UnitOfWork;
+using BookStore.Service.Helper;
 using BookStore.Service.Service.ImplService;
 using BookStore.Service.Service.InterfaceService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -9,12 +10,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -46,6 +51,7 @@ builder.Services.AddSwaggerGen(options =>
         new List<string>()
         }
     });
+    options.SchemaFilter<EnumSchemaFilter>();
 });
 var key = builder.Configuration.GetValue<string>("ApiSetting:Secret");
 builder.Services.AddAuthentication(x =>
@@ -75,6 +81,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IAuthUserService, AuthUserService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReturnOrderService, ReturnOrderService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
