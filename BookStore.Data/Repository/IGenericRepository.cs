@@ -11,8 +11,9 @@ namespace BookStore.Data.Repository
 {
     public interface IGenericRepository<T> where T : class
     {
-        Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null);
+        Task<List<T>> GetWhere(Expression<Func<T, bool>>? filter = null);
         Task<T> GetAsync(Expression<Func<T, bool>>? filter = null);
+        DbSet<T> GetAll();
         Task CreateAsync(T entity);
         EntityEntry<T> Delete(T entity);
         IQueryable<T> FindAll(Func<T, bool> predicate);

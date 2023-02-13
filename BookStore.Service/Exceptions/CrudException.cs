@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net;
 
 namespace BookStore.Service.Exceptions
 {
@@ -12,7 +13,7 @@ namespace BookStore.Service.Exceptions
         public HttpStatusCode Status { get; private set; }
         public string Error { get; set; }
 
-        public CrudException(HttpStatusCode status,string msg, string error) : base(msg)
+        public CrudException(HttpStatusCode status, string msg, string error) : base(msg)
         {
             Status = status;
             Error = error;

@@ -1,17 +1,15 @@
-﻿using BookStore.Service.Helper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using BookStore.Service.Helpers;
+using Microsoft.Data.SqlClient;
+using NTQ.Sdk.Core.CustomModel;
+using NTQ.Sdk.Core.ViewModels;
+using static BookStore.Service.Helpers.SortType;
 
 namespace BookStore.Service.DTO.Request
 {
-    public class PagingRequest
+    public class PagingRequest:SortModel
     {
-        public int Page { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
-        public string? SortDirection { get; set; }
-        public string? SortProperty { get; set; }
+        public PagingMetadata? PagingModel { get; set; }
+        
     }
 }

@@ -4,26 +4,31 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using NTQ.Sdk.Core.BaseConnect;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace BookStore.Data.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly BookStoreContext _dbContext;
-        public UnitOfWork(BookStoreContext dbContext)
+        private readonly BookStoreContext _context;
+
+        public UnitOfWork(BookStoreContext context)
         {
-            _dbContext = dbContext;
+            _context = context;
         }
 
         private readonly Dictionary<Type, object> reposotories = new Dictionary<Type, object>();
-        
-        public IGenericRepository<T> Repository<T>() where T : class
+
+        public IGenericRepository<T> Repository<T>()
+            where T : class
         {
             Type type = typeof(T);
-            if(!reposotories.TryGetValue(type, out object value))
+            if (!reposotories.TryGetValue(type, out object value))
             {
-                var genericRepos = new GenericRepository<T>(_dbContext);
+                var genericRepos = new GenericRepository<T>(_context);
                 reposotories.Add(type, genericRepos);
                 return genericRepos;
             }
@@ -38,7 +43,7 @@ namespace BookStore.Data.UnitOfWork
             {
                 if (disposing)
                 {
-                    _dbContext.Dispose();
+                    _context.Dispose();
                 }
             }
             this.disposed = true;
@@ -49,12 +54,12 @@ namespace BookStore.Data.UnitOfWork
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         public int Commit()
         {
-            return _dbContext.SaveChanges();
+            return _context.SaveChanges();
         }
 
-        public Task<int> CommitAsync() => _dbContext.SaveChangesAsync();
-
+        public Task<int> CommitAsync() => _context.SaveChangesAsync();
     }
 }

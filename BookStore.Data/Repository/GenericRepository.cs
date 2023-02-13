@@ -1,5 +1,6 @@
 ﻿using BookStore.Data.Models;
 using Microsoft.EntityFrameworkCore;
+
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
@@ -13,18 +14,27 @@ namespace BookStore.Data.Repository
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        private readonly BookStoreContext _dbContext;
-        private static DbSet<T> _dbSet;
-        public GenericRepository(BookStoreContext dbContext)
+        private static BookStoreContext Context;
+        private static DbSet<T> Table { get; set; }
+        public GenericRepository(BookStoreContext context)
         {
-            _dbContext =  dbContext;
-            _dbSet = _dbContext.Set<T>();
+            Context = context;
+            Table = Context.Set<T>();
+        }
+        public async Task CreateAsync(T entity)
+        {
+            await Context.AddAsync(entity);
         }
 
-        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null)
+        public async Task RemoveAsync(T entity)
         {
-            IQueryable<T> query = _dbSet;
-            if(filter != null)
+            Context.Remove(entity);
+        }
+
+        public async Task<List<T>> GetWhere(Expression<Func<T, bool>>? filter = null)
+        {
+            IQueryable<T> query = Table;
+            if (filter != null)
             {
                 query = query.Where(filter);
             }
@@ -33,54 +43,49 @@ namespace BookStore.Data.Repository
 
         public async Task<T> GetAsync(Expression<Func<T, bool>>? filter = null)
         {
-            IQueryable<T> query = _dbSet;
-            if(filter != null)
+             IQueryable<T> query = Table;
+            if (filter != null)
             {
                 query = query.Where(filter);
             }
-            return await query.SingleOrDefaultAsync();
+            return await query.FirstOrDefaultAsync();
         }
 
-        public async Task CreateAsync(T entity)
-        {
-            await _dbContext.AddAsync(entity);
-        }
 
         public EntityEntry<T> Delete(T entity)
         {
-            return _dbContext.Remove(entity);
+            return Context.Remove(entity);
         }
 
         public IQueryable<T> FindAll(Func<T, bool> predicate)
         {
-            return _dbSet.Where(predicate).AsQueryable();
+            return Table.Where(predicate).AsQueryable();
         }
 
         public T Find(Func<T, bool> predicate)
         {
-            return _dbSet.FirstOrDefault(predicate);
+            return Table.FirstOrDefault(predicate);
         }
 
         public async Task<T> FindAsync(Expression<Func<T, bool>> predicate)
         {
-            return await _dbSet.SingleOrDefaultAsync(predicate);
+            return await Table.SingleOrDefaultAsync(predicate);
         }
 
         public async Task<T> GetById(int id)
         {
-            return await _dbSet.FindAsync(id);
+            return await Table.FindAsync(id);
         }
-
         public async Task Update(T entity, int Id)
         {
             var existEntity = await GetById(Id);
-            _dbContext.Entry(existEntity).CurrentValues.SetValues(entity);
-            _dbContext.Update(existEntity);
+            Context.Entry(existEntity).CurrentValues.SetValues(entity);
+            Table.Update(existEntity);
         }
 
         public DbSet<T> GetAll()
         {
-            return _dbSet;
+            return Table;
         }
     }
 }
