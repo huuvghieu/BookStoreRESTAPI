@@ -47,7 +47,7 @@ namespace BookStore.Service
                 if(user== null) throw new CrudException(HttpStatusCode.NotFound, "User Not Found", "");
                 var order = _unitOfWork.Repository<OrderBook>().GetAll().Where(a => a.UserId == userId 
                 && a.Status==1 && a.OrderReturnDate<DateTime.Now);
-                if (order.IsNullOrEmpty()) throw new CrudException(HttpStatusCode.BadRequest, "", "");
+                if (!order.IsNullOrEmpty()) throw new CrudException(HttpStatusCode.BadRequest, "", "");
                 OrderReponseModel response = new OrderReponseModel()
                 {
                    OrderDate = DateTime.Now,
