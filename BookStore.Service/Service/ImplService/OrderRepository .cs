@@ -165,6 +165,8 @@ namespace BookStore.Service
                 var filter = _mapper.Map<OrderReponseModel>(model);
                 filter.SortDirection = request.SortDirection;
                 filter.SortProperty = request.SortProperty;
+                var orderDateString = filter.OrderDate.ToString();
+                orderDateString = request.KeySearch;
                 var response = _unitOfWork.Repository<OrderBook>().GetAll()
                 .Select(a => new OrderReponseModel
                 {
@@ -184,6 +186,7 @@ namespace BookStore.Service
                         Quantity = a.Quantity
                     }))
                 });
+                
                 var rp= response.DynamicFilter(filter).DynamicSort(filter);
                 if (request.PagingModel == null)
                 {

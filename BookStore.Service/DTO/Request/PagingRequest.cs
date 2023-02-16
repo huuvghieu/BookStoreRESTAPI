@@ -1,8 +1,10 @@
 ﻿
 using BookStore.Service.Helpers;
 using Microsoft.Data.SqlClient;
+using NTQ.Sdk.Core.Attributes;
 using NTQ.Sdk.Core.CustomModel;
 using NTQ.Sdk.Core.ViewModels;
+using System.Text.Json.Serialization;
 using static BookStore.Service.Helpers.SortType;
 
 namespace BookStore.Service.DTO.Request
@@ -10,6 +12,8 @@ namespace BookStore.Service.DTO.Request
     public class PagingRequest:SortModel
     {
         public PagingMetadata? PagingModel { get; set; }
-        
+        [String]
+        public string? KeySearch { get; set; }
+
     }
 }

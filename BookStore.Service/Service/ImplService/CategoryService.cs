@@ -6,6 +6,7 @@ using BookStore.Data.UnitOfWork;
 using BookStore.Service.DTO.Request;
 using BookStore.Service.DTO.Response;
 using BookStore.Service.Exceptions;
+using BookStore.Service.Helpers;
 using BookStore.Service.Service.InterfaceService;
 using Microsoft.AspNetCore.Server.IIS.Core;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -76,10 +78,11 @@ namespace BookStore.Service.Service.ImplService
                 var filter = new CategoryResponse();
                 filter.SortDirection = pagingRequest.SortDirection;
                 filter.SortProperty = pagingRequest.SortProperty;
+                filter.CateName = pagingRequest.KeySearch;
 
                 var rsFilter = _unitOfWork.Repository<Category>().GetAll()
                                 .ProjectTo<CategoryResponse>(_mapper.ConfigurationProvider)
-                                .DynamicSort(filter).DynamicFilter(filter);
+                                .DynamicSort(filter).DynamicFilters(filter);
 
                 var res = rsFilter.PagingQueryable(pagingRequest.PagingModel.Page, pagingRequest.PagingModel.Size);
 

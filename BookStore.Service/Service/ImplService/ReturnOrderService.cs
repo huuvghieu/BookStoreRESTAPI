@@ -4,8 +4,9 @@ using BookStore.Data.UnitOfWork;
 using BookStore.Service.DTO.Request;
 using BookStore.Service.DTO.Response;
 using BookStore.Service.Exceptions;
-using BookStore.Service.Helper;
+using BookStore.Service.Helpers;
 using BookStore.Service.Service.InterfaceService;
+using DataAcess.ResponseModels;
 using Microsoft.EntityFrameworkCore;
 using NTQ.Sdk.Core.CustomModel;
 using System;
@@ -27,26 +28,27 @@ namespace BookStore.Service.Service.ImplService
             _mapper = mapper;
         }
 
-        public async Task<BaseResponseViewModel<OrderResponse>> ReturnOrder(ReturnOrderRequest returnRequest)
+        public async Task<BaseResponseViewModel<OrderReponseModel>> ReturnOrder(ReturnOrderRequest returnRequest)
         {
             try
             {
                 var orderBook = _unitOfWork.Repository<OrderBook>().GetAll().Include(u => u.OrderDetails)
                                                         .FirstOrDefault(u => u.OrderId == returnRequest.OrderID && u.UserId == returnRequest.UserID);
-                if (orderBook.Status == (int)StatusType.Status.None)
+                if (orderBook.Status == (int)StatusType.StatusOrder.Returned)
                 {
                     throw new Exception();
                 }
                 var orderDetailList = orderBook.OrderDetails.ToList();
                 var orderDetail = orderDetailList.FirstOrDefault(u => u.BookId == returnRequest.BookID);
                 int newQuantity = orderDetail.Quantity - returnRequest.Quantity;
+                if (returnRequest.Quantity > orderDetail.Quantity) throw new Exception();
                 var book = _unitOfWork.Repository<Book>().GetAll()
                                                             .FirstOrDefault(u => u.BookId == returnRequest.BookID);
                 if (newQuantity == 0)
                 {
                     orderDetail.Quantity = newQuantity;
                     book.CurrentQuantity += returnRequest.Quantity;
-                    orderBook.Status = (int)StatusType.Status.None;
+                    orderBook.Status = (int)StatusType.StatusOrder.Returned;
                     orderBook.OrderReturnDate = DateTime.Now;
                     orderDetail.Price = newQuantity * book.Price;
                 }
@@ -54,19 +56,19 @@ namespace BookStore.Service.Service.ImplService
                 {
                     orderDetail.Quantity = newQuantity;
                     book.CurrentQuantity += returnRequest.Quantity;
-                    orderBook.Status = (int)StatusType.Status.Borrowing;
+                    orderBook.Status = (int)StatusType.StatusOrder.Borrowing;
                     orderDetail.Price = newQuantity * book.Price;
                 }
-                var responseOrder = _mapper.Map<OrderResponse>(orderBook);
-                var responesOrderDetail = _mapper.Map<OrderDetailResponse>(orderDetail);
-                var responseBook = _mapper.Map<BookResponse>(orderDetail.Book);
+                var responseOrder = _mapper.Map<OrderReponseModel>(orderBook);
+                var responesOrderDetail = _mapper.Map<OrderDetailReponseModel>(orderDetail);
+                var responseBook = _mapper.Map<BookReponseModel>(orderDetail.Book);
                 await _unitOfWork.Repository<OrderBook>().Update(orderBook, orderBook.OrderId);
                 await _unitOfWork.CommitAsync();
                 await _unitOfWork.Repository<OrderDetail>().Update(orderDetail, orderDetail.OrderDetailId);
                 await _unitOfWork.CommitAsync();
                 await _unitOfWork.Repository<Book>().Update(orderDetail.Book, orderDetail.Book.BookId);
                 await _unitOfWork.CommitAsync();
-                return new BaseResponseViewModel<OrderResponse>()
+                return new BaseResponseViewModel<OrderReponseModel>()
                 {
                     Status = new StatusViewModel
                     {
@@ -79,7 +81,7 @@ namespace BookStore.Service.Service.ImplService
             }
             catch(Exception ex)
             {
-                throw new CrudException(HttpStatusCode.BadRequest, "Get Books Paging Error!!!", e.InnerException?.Message);
+                throw new CrudException(HttpStatusCode.BadRequest, "Get Books Paging Error!!!", ex.InnerException?.Message);
             }
         }
     }
