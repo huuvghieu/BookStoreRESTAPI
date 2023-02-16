@@ -15,7 +15,7 @@ namespace BookStore.Service.Service.InterfaceService
     {
         Task<BaseResponseViewModel<OrderReponseModel>> CreateOrder(List<OrderCreateRequestModel> model,int userId);
         Task<BaseResponseViewModel<OrderReponseModel>> GetOrder(int id);
-        Task<BaseResponsePagingViewModel<OrderReponseModel>> GetOrders(PagingRequest? request, OrderRequestModel? model);
+        Task<BaseResponsePagingViewModel<OrderReponseModel>> GetOrders(PagingRequest request, OrderRequestModel model);
         Task<BaseResponseViewModel<OrderDetailReponseModel>>UpdateItemOfOrder(int id, OrderDetailUpdateRequestModel order);
         Task<BaseResponseViewModel<OrderDetailReponseModel>> DeleteItemOfOrder(int id);
 

@@ -10,8 +10,9 @@ namespace DataAcess.RequestModels
 {
     public class OrderRequestModel
     {
-        public DateTime OrderDate { get; set; }
-        public DateTime OrderReturnDate { get; set; }
+
+        public DateTime? OrderDate { get; set; } = null;
+        public DateTime? OrderReturnDate { get; set; } = null;
         public int Status { get; set; }
         [ForeignKey("User")]
         public int UserId { get; set; }

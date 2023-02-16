@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using BookStore.Data.Models;
 using NTQ.Sdk.Core.ViewModels;
 using BookStore.Service.DTO.Response;
+using NTQ.Sdk.Core.Attributes;
+using System.Text.Json.Serialization;
 
 namespace DataAcess.ResponseModels
 {
@@ -15,13 +17,19 @@ namespace DataAcess.ResponseModels
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int BookID { get; set; }
+        public int BookId { get; set; }
+        [StringAttribute]
         public string BookName { get; set; }
+        [StringAttribute]
         public string? BookImg { get; set; }
-        public int CurrentQuantity { get; set; }
+        [IntAttribute]
+        public int? CurrentQuantity { get; set; }
+        [StringAttribute]
         public string BookDetail { get; set; }
-        public int CateID { get; set; }
+        [IntAttribute]
+        public int? CateId { get; set; } 
         public CategoryResponse Cate { get; set; }
-        public int Price { get; set; }
+        [IntAttribute]
+        public int? Price { get; set; } 
     }
 }
