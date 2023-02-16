@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BookStore.Data.Models;
 using NTQ.Sdk.Core.ViewModels;
+using NTQ.Sdk.Core.Attributes;
 
 namespace DataAcess.ResponseModels
 {

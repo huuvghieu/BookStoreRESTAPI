@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BookStore.Data.Models;
 using NTQ.Sdk.Core.ViewModels;
+using BookStore.Service.DTO.Response;
 
 namespace DataAcess.ResponseModels
 {
@@ -20,7 +21,7 @@ namespace DataAcess.ResponseModels
         public int CurrentQuantity { get; set; }
         public string BookDetail { get; set; }
         public int CateID { get; set; }
-        public CategoryReponseModel Cate { get; set; }
+        public CategoryResponse Cate { get; set; }
         public int Price { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using BookStore.Data.UnitOfWork;
 using BookStore.Service.DTO.Request;
 using BookStore.Service.DTO.Response;
 using BookStore.Service.Exceptions;
+using BookStore.Service.Helpers;
 using BookStore.Service.Service.InterfaceService;
 using NTQ.Sdk.Core.CustomModel;
 using NTQ.Sdk.Core.Utilities;
@@ -12,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -101,6 +103,14 @@ namespace BookStore.Service.Service.ImplService
                 var filter = new UserResponse();
                 filter.SortDirection = pagingRequest.SortDirection;
                 filter.SortProperty = pagingRequest.SortProperty;
+                PropertyInfo[] properties = filter.GetType().GetProperties();
+                foreach (PropertyInfo propertyInfo in properties)
+                {
+                    if (propertyInfo.Name == pagingRequest.SortProperty)
+                    {
+                       propertyInfo.SetValue(filter, pagingRequest.KeySearch);
+                    }
+                };
 
                 var rsFilter = _unitOfWork.Repository<User>().GetAll()
                                 .ProjectTo<UserResponse>(_mapper.ConfigurationProvider)

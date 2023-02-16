@@ -1,11 +1,11 @@
-using BookStore.API.Mapper;
+
 using BookStore.Data.Models;
 using BookStore.Data.Repository;
 using BookStore.Data.UnitOfWork;
 using BookStore.Service;
-using BookStore.Service.Helper;
 using BookStore.Service.Service.ImplService;
 using BookStore.Service.Service.InterfaceService;
+using BusinessTier.Mapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -49,7 +49,6 @@ builder.Services.AddSwaggerGen(options =>
         new List<string>()
         }
     });
-    options.SchemaFilter<EnumSchemaFilter>();
 });
 var key = builder.Configuration.GetValue<string>("ApiSetting:Secret");
 builder.Services.AddAuthentication(x =>
@@ -71,7 +70,7 @@ builder.Services.AddAuthentication(x =>
     });
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-builder.Services.AddAutoMapper(typeof(MappingConfig));
+builder.Services.AddAutoMapper(typeof(Mapping));
 builder.Services.AddControllers().AddJsonOptions(x =>
                 x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 

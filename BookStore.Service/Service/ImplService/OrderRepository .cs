@@ -8,6 +8,7 @@ using BookStore.Data.UnitOfWork;
 using BookStore.Service;
 using BookStore.Service.DTO.Request;
 using BookStore.Service.Exceptions;
+using BookStore.Service.Helpers;
 using BookStore.Service.Service.InterfaceService;
 using DataAcess.RequestModels;
 using DataAcess.ResponseModels;
@@ -46,7 +47,7 @@ namespace BookStore.Service
                 var user=_unitOfWork.Repository<User>().GetAll().FirstOrDefault(a=>a.UserId==userId);
                 if(user== null) throw new CrudException(HttpStatusCode.NotFound, "User Not Found", "");
                 var order = _unitOfWork.Repository<OrderBook>().GetAll().Where(a => a.UserId == userId 
-                && a.Status==1 && a.OrderReturnDate<DateTime.Now);
+                && a.Status== (int)StatusType.StatusOrder.Borrowing && a.OrderReturnDate<DateTime.Now);
                 if (!order.IsNullOrEmpty()) throw new CrudException(HttpStatusCode.BadRequest, "", "");
                 OrderReponseModel response = new OrderReponseModel()
                 {
@@ -177,6 +178,8 @@ namespace BookStore.Service
                 var filter = _mapper.Map<OrderReponseModel>(model);
                 filter.SortDirection = request.SortDirection;
                 filter.SortProperty = request.SortProperty;
+                var orderDateString = filter.OrderDate.ToString();
+                orderDateString = request.KeySearch;
                 var response = _unitOfWork.Repository<OrderBook>().GetAll()
                 .Select(a => new OrderReponseModel
                 {
@@ -196,6 +199,7 @@ namespace BookStore.Service
                         Quantity = a.Quantity
                     }))
                 });
+                
                 var rp= response.DynamicFilter(filter).DynamicSort(filter);
                  var result = rp.PagingQueryable(request.PagingModel.Page, request.PagingModel.Size).Item2;
                     return new BaseResponsePagingViewModel<OrderReponseModel>()

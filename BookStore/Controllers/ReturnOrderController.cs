@@ -1,6 +1,7 @@
 ﻿using BookStore.Service.DTO.Request;
 using BookStore.Service.DTO.Response;
 using BookStore.Service.Service.InterfaceService;
+using DataAcess.ResponseModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookStore.API.Controllers
@@ -16,7 +17,7 @@ namespace BookStore.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<OrderResponse>> ReturnOrder(ReturnOrderRequest returnOrderRequest, int userId)
+        public async Task<ActionResult<OrderReponseModel>> ReturnOrder(ReturnOrderRequest returnOrderRequest, int userId)
         {
             var rs = await _returnService.ReturnOrder(returnOrderRequest, userId);
             return Ok(rs);

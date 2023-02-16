@@ -10,8 +10,8 @@ namespace BookStore.Service.Helpers
     {
         public enum StatusOrder
         {
-            Borrowing = 0,
-            Returned = 1,
+            Returned = 0,
+            Borrowing = 1,
             Overdue = 2
         }
     }
