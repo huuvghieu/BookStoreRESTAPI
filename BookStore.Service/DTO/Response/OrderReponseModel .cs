@@ -1,4 +1,4 @@
-﻿using System;
+﻿
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
@@ -16,11 +16,15 @@ namespace DataAcess.ResponseModels
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int OrderId { get; set; }
+        [DateTimeFieldAttribute]
         public DateTime OrderDate { get; set; }
+        [DateTimeFieldAttribute]
         public DateTime OrderReturnDate { get; set; }
-        public int Status { get; set; }
+        [IntAttribute]
+        public int? Status { get; set; }
         [ForeignKey("User")]
-        public int UserId { get; set; }
+        [IntAttribute]
+        public int? UserId { get; set; }
         public User User { get; set; }
         public List<OrderDetailReponseModel> OrderDetail { get; set; }
     }

@@ -18,10 +18,7 @@ namespace BusinessTier.Mapper
             CreateMap<BookRequestModel, Book>().ReverseMap();
             CreateMap<BookReponseModel, Book>().ReverseMap();
 
-            CreateMap<OrderDetailRequestModel, OrderDetailReponseModel>().ReverseMap();
-            CreateMap<OrderCreateRequestModel, OrderDetailReponseModel>().ReverseMap();
-            CreateMap<OrderDetailRequestModel, OrderDetail>().ReverseMap();
-            CreateMap<OrderDetailReponseModel, OrderReponseModel>().ReverseMap();
+            CreateMap<OrderDetailReponseModel, OrderDetail>().ReverseMap();
             CreateMap<OrderCreateRequestModel, OrderDetail>().ReverseMap();
             CreateMap<OrderRequestModel, OrderReponseModel>().ReverseMap();
             CreateMap<OrderReponseModel, OrderBook>().ReverseMap();

@@ -66,9 +66,7 @@ namespace BookStore.Service
                     var m = _mapper.Map<OrderDetail>(item);
                     m.Price = (item.Quantity * (book.Price));
                     m.OrderId = o.OrderId;
-                    o.OrderDetails.ToList().Add(m);
                     await _unitOfWork.Repository<OrderDetail>().CreateAsync(m);
-                    await _unitOfWork.CommitAsync();
                     book.CurrentQuantity = book.CurrentQuantity - item.Quantity;
                     await _unitOfWork.Repository<Book>().Update(book, book.BookId);
                     await _unitOfWork.CommitAsync();
@@ -158,8 +156,7 @@ namespace BookStore.Service
                 throw new CrudException(HttpStatusCode.BadRequest, "Get Order By Id Error !", ex.InnerException?.Message);
             }
         }
-
-        public async Task<BaseResponsePagingViewModel<OrderReponseModel>> GetOrders(PagingRequest? request, OrderRequestModel? model)
+        public async Task<BaseResponsePagingViewModel<OrderReponseModel>> GetOrders(PagingRequest request, OrderRequestModel model)
         {
             try
             {
@@ -176,6 +173,8 @@ namespace BookStore.Service
                     request.PagingModel.Size = 10;
                 }
                 var filter = _mapper.Map<OrderReponseModel>(model);
+                if(filter.Status==0) filter.Status = null;
+                if (filter.UserId == 0) filter.UserId = null;
                 filter.SortDirection = request.SortDirection;
                 filter.SortProperty = request.SortProperty;
                 var orderDateString = filter.OrderDate.ToString();
@@ -199,8 +198,8 @@ namespace BookStore.Service
                         Quantity = a.Quantity
                     }))
                 });
-                
-                var rp= response.DynamicFilter(filter).DynamicSort(filter);
+                    var rs = response.Where(a => a.OrderDate >= model.OrderDate || a.OrderReturnDate >= model.OrderReturnDate);
+                var rp= rs.DynamicFilter(filter).DynamicSort(filter);
                  var result = rp.PagingQueryable(request.PagingModel.Page, request.PagingModel.Size).Item2;
                     return new BaseResponsePagingViewModel<OrderReponseModel>()
                     {
@@ -224,7 +223,6 @@ namespace BookStore.Service
                 var book = _unitOfWork.Repository<Book>().GetAll().FirstOrDefault(x => x.BookId == rs.BookId);
                 book.CurrentQuantity = book.CurrentQuantity - (order.Quantity - rs.Quantity);
                 await _unitOfWork.Repository<Book>().Update(book, book.BookId);
-                await _unitOfWork.CommitAsync();
                 var updateOrder = _mapper.Map<OrderDetailUpdateRequestModel, OrderDetail>(order, rs);
                 updateOrder.Price=book.Price*updateOrder.Quantity;
                 await _unitOfWork.Repository<OrderDetail>().Update(updateOrder, id);
