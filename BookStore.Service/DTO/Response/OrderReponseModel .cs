@@ -16,9 +16,9 @@ namespace DataAcess.ResponseModels
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int OrderId { get; set; }
-        [DateTimeFieldAttribute]
+        [Skip]
         public DateTime OrderDate { get; set; }
-        [DateTimeFieldAttribute]
+        [Skip]
         public DateTime OrderReturnDate { get; set; }
         [IntAttribute]
         public int? Status { get; set; }

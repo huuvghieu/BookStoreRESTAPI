@@ -180,9 +180,6 @@ namespace BookStore.Service
                     request.PagingModel.Size = 10;
                 }
                 var filter=_mapper.Map<BookReponseModel>(model);
-                if (filter.CurrentQuantity == 0) filter.CurrentQuantity = null;
-                if(filter.CateId==0) filter.CateId = null;
-                if(filter.Price==0) filter.Price = null;
                 filter.SortDirection = request.SortDirection;
                 filter.SortProperty=request.SortProperty;
                 var response = _unitOfWork.Repository<Book>().GetAll().Include(a=>a.Cate).ProjectTo<BookReponseModel>(_mapper.ConfigurationProvider).DynamicFilter(filter).DynamicSort(filter);
