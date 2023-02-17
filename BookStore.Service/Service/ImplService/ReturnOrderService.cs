@@ -52,16 +52,30 @@ namespace BookStore.Service.Service.ImplService
                 {
                     orderDetail.Quantity = newQuantity;
                     book.CurrentQuantity += returnRequest.Quantity;
-                    orderBook.Status = (int)StatusType.StatusOrder.Returned;
-                    orderBook.OrderReturnDate = DateTime.Now;
                     orderDetail.Price = newQuantity * book.Price;
                 }
                 if (newQuantity > 0)
                 {
                     orderDetail.Quantity = newQuantity;
                     book.CurrentQuantity += returnRequest.Quantity;
-                    orderBook.Status = (int)StatusType.StatusOrder.Borrowing;
                     orderDetail.Price = newQuantity * book.Price;
+                }
+                int check = 0;
+                foreach (var item in orderDetailList)
+                {
+                    if (item.Quantity == 0)
+                    {
+                        check++;
+                    }
+                };
+                if (check == orderDetailList.Count)
+                {
+                    orderBook.Status = (int)StatusType.StatusOrder.Returned;
+                    orderBook.OrderReturnDate = DateTime.Now;
+                }
+                else
+                {
+                    orderBook.Status = (int)StatusType.StatusOrder.Borrowing;
                 }
                 var responseOrder = _mapper.Map<OrderReponseModel>(orderBook);
                 var responesOrderDetail = _mapper.Map<OrderDetailReponseModel>(orderDetail);
