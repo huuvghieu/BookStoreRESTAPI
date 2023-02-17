@@ -22,14 +22,14 @@ namespace DataAcess.ResponseModels
         public string BookName { get; set; }
         [StringAttribute]
         public string? BookImg { get; set; }
-        [IntAttribute]
-        public int? CurrentQuantity { get; set; }
         [StringAttribute]
         public string BookDetail { get; set; }
         [IntAttribute]
         public int? CateId { get; set; } 
         public CategoryResponse Cate { get; set; }
         [IntAttribute]
-        public int? Price { get; set; } 
+        public int? Price { get; set; }
+        [IntAttribute]
+        public int? CurrentQuantity { get; set; }
     }
 }

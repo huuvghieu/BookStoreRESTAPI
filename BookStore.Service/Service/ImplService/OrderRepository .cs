@@ -15,6 +15,7 @@ using DataAcess.ResponseModels;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using NTQ.Sdk.Core.Attributes;
 using NTQ.Sdk.Core.BaseConnect;
 using NTQ.Sdk.Core.CustomModel;
 using NTQ.Sdk.Core.Utilities;
@@ -23,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -173,12 +175,8 @@ namespace BookStore.Service
                     request.PagingModel.Size = 10;
                 }
                 var filter = _mapper.Map<OrderReponseModel>(model);
-                if(filter.Status==0) filter.Status = null;
-                if (filter.UserId == 0) filter.UserId = null;
                 filter.SortDirection = request.SortDirection;
                 filter.SortProperty = request.SortProperty;
-                var orderDateString = filter.OrderDate.ToString();
-                orderDateString = request.KeySearch;
                 var response = _unitOfWork.Repository<OrderBook>().GetAll()
                 .Select(a => new OrderReponseModel
                 {
@@ -198,9 +196,8 @@ namespace BookStore.Service
                         Quantity = a.Quantity
                     }))
                 });
-                    var rs = response.Where(a => a.OrderDate >= model.OrderDate || a.OrderReturnDate >= model.OrderReturnDate);
-                var rp= rs.DynamicFilter(filter).DynamicSort(filter);
-                 var result = rp.PagingQueryable(request.PagingModel.Page, request.PagingModel.Size).Item2;
+                var rs = response.Where(a => a.OrderDate >= model.OrderDate && a.OrderReturnDate >= model.OrderReturnDate).DynamicFilter(filter).DynamicSort(filter);
+                var result = rs.PagingQueryable(request.PagingModel.Page, request.PagingModel.Size).Item2;
                     return new BaseResponsePagingViewModel<OrderReponseModel>()
                     {
                         Data = result.ToList(),
@@ -213,6 +210,7 @@ namespace BookStore.Service
                 throw new CrudException(HttpStatusCode.BadRequest, "Get Books Paging Error!!!", e.InnerException?.Message);
             }
         }
+
 
        public async Task<BaseResponseViewModel<OrderDetailReponseModel>>UpdateItemOfOrder(int id, OrderDetailUpdateRequestModel order)
         {

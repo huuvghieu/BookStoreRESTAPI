@@ -12,9 +12,9 @@ namespace DataAcess.RequestModels
         public string? BookName { get; set; }
         public string? BookImg { get; set; }
         public string? BookDetail { get; set; }
-        public int CurrentQuantity { get; set; }
+        public int? CurrentQuantity { get; set; } = null;
         [ForeignKey("Category")]
-        public int CateID { get; set; }
-        public int Price { get; set; }
+        public int? CateID { get; set; }=null;
+        public int? Price { get; set; }=null;
     }
 }
