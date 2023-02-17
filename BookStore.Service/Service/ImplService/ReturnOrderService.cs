@@ -37,17 +37,20 @@ namespace BookStore.Service.Service.ImplService
                 if (user == null) throw new Exception();
                 var orderBook = _unitOfWork.Repository<OrderBook>().GetAll().Include(u => u.OrderDetails)
                                                         .FirstOrDefault(u => u.OrderId == returnRequest.OrderID && u.UserId == userId);
+                if(orderBook == null) throw new Exception();
                 if (orderBook.Status == (int)StatusType.StatusOrder.Returned)
                 {
                     throw new Exception();
                 }
-                var orderDetailList = orderBook.OrderDetails.ToList();
+                var orderDetailList = orderBook.OrderDetails.AsQueryable().Include(u => u.Book).ToList();
                 var orderDetail = orderDetailList.FirstOrDefault(u => u.BookId == returnRequest.BookID);
+                if (orderDetail == null) throw new Exception();
                 if (returnRequest.Quantity > orderDetail.Quantity) throw new Exception();
                 int newQuantity = orderDetail.Quantity - returnRequest.Quantity;
                 if (returnRequest.Quantity > orderDetail.Quantity) throw new Exception();
                 var book = _unitOfWork.Repository<Book>().GetAll()
                                                             .FirstOrDefault(u => u.BookId == returnRequest.BookID);
+                if (book == null) throw new Exception();
                 if (newQuantity == 0)
                 {
                     orderDetail.Quantity = newQuantity;
