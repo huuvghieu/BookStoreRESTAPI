@@ -11,9 +11,11 @@ public partial class OrderBook
 
     public DateTime OrderReturnDate { get; set; }
 
-    public int Status { get; set; }
+    public int? Status { get; set; }
 
     public int UserId { get; set; }
+
+    public int? TotalPrice { get; set; }
 
     public virtual ICollection<OrderDetail> OrderDetails { get; } = new List<OrderDetail>();
 

@@ -11,7 +11,11 @@ namespace BookStore.Service.DTO.Request
 {
     public class PagingRequest:SortModel
     {
-        public PagingMetadata? PagingModel { get; set; }
+        public int Page { get; set; } = 1;
+
+        public int Size { get; set; } = 10;
+
+        public int Total { get; set; }
         [String]
         public string? KeySearch { get; set; }
 
