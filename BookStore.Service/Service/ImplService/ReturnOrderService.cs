@@ -109,7 +109,9 @@ namespace BookStore.Service.Service.ImplService
                 var responseBook = _mapper.Map<BookReponseModel>(orderDetail.Book);
 
                 await _unitOfWork.Repository<OrderBook>().Update(orderBook, orderBook.OrderId);
+                await _unitOfWork.CommitAsync();
                 await _unitOfWork.Repository<OrderDetail>().Update(orderDetail, orderDetail.OrderDetailId);
+                await _unitOfWork.CommitAsync();
                 await _unitOfWork.Repository<Book>().Update(orderDetail.Book, orderDetail.Book.BookId);
                 await _unitOfWork.CommitAsync();
                 return new BaseResponseViewModel<OrderReponseModel>()

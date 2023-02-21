@@ -59,14 +59,13 @@ namespace BookStore.Service.Service.ImplService
             }
         }
 
-        public async Task<BaseResponsePagingViewModel<CategoryResponse>> GetCategories(PagingRequest pagingRequest)
+        public async Task<BaseResponsePagingViewModel<CategoryResponse>> GetCategories(PagingRequest pagingRequest, CategoryRequest categoryRequest)
         {
             try
             {
-                var filter = new CategoryResponse();
+                var filter = _mapper.Map<CategoryResponse>(categoryRequest);
                 filter.SortDirection = pagingRequest.SortDirection;
                 filter.SortProperty = pagingRequest.SortProperty;
-                filter.CateName = pagingRequest.KeySearch;
 
                 var rsFilter = _unitOfWork.Repository<Category>().GetAll()
                                 .ProjectTo<CategoryResponse>(_mapper.ConfigurationProvider)

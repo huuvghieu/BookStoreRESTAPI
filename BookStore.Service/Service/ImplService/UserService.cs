@@ -84,21 +84,13 @@ namespace BookStore.Service.Service.ImplService
             }
         }
 
-        public async Task<BaseResponsePagingViewModel<UserResponse>> GetUsers(PagingRequest pagingRequest)
+        public async Task<BaseResponsePagingViewModel<UserResponse>> GetUsers(PagingRequest pagingRequest, UserRequest userRequest)
         {
             try
             {
-                var filter = new UserResponse();
+                var filter = _mapper.Map<UserResponse>(userRequest);
                 filter.SortDirection = pagingRequest.SortDirection;
                 filter.SortProperty = pagingRequest.SortProperty;
-                PropertyInfo[] properties = filter.GetType().GetProperties();
-                foreach (PropertyInfo propertyInfo in properties)
-                {
-                    if (propertyInfo.Name == pagingRequest.SortProperty)
-                    {
-                       propertyInfo.SetValue(filter, pagingRequest.KeySearch);
-                    }
-                };
 
                 var rsFilter = _unitOfWork.Repository<User>().GetAll()
                                 .ProjectTo<UserResponse>(_mapper.ConfigurationProvider)

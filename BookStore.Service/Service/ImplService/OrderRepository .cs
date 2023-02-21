@@ -162,18 +162,6 @@ namespace BookStore.Service
         {
             try
             {
-                if (request.PagingModel == null)
-                {
-                    request.PagingModel = new PagingMetadata();
-                }
-                if (request.PagingModel.Page == 0)
-                {
-                    request.PagingModel.Page = 1;
-                }
-                if (request.PagingModel.Size == 0)
-                {
-                    request.PagingModel.Size = 10;
-                }
                 var filter = _mapper.Map<OrderReponseModel>(model);
                 filter.SortDirection = request.SortDirection;
                 filter.SortProperty = request.SortProperty;

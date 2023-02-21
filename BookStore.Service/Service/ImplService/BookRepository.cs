@@ -165,22 +165,28 @@ namespace BookStore.Service
         }
         public async Task<BaseResponsePagingViewModel<BookReponseModel>> GetBooks(PagingRequest request,BookRequestModel model)
         {
-                var filter=_mapper.Map<BookReponseModel>(model);
+            try {
+                var filter = _mapper.Map<BookReponseModel>(model);
                 filter.SortDirection = request.SortDirection;
-                filter.SortProperty=request.SortProperty;
-                var response = _unitOfWork.Repository<Book>().GetAll().Include(a=>a.Cate).ProjectTo<BookReponseModel>(_mapper.ConfigurationProvider).DynamicFilter(filter).DynamicSort(filter);
+                filter.SortProperty = request.SortProperty;
+                var response = _unitOfWork.Repository<Book>().GetAll().Include(a => a.Cate).ProjectTo<BookReponseModel>(_mapper.ConfigurationProvider).DynamicFilter(filter).DynamicSort(filter);
                 var result = response.PagingQueryable(request.Page, request.Size).Item2;
-                    return new BaseResponsePagingViewModel<BookReponseModel>()
-                    {
-                        Data = result.ToList(),
-                        Metadata = request.PagingModel
-                    };
-            }
-                catch (Exception e)
+                return new BaseResponsePagingViewModel<BookReponseModel>()
                 {
-
-                    throw new CrudException(HttpStatusCode.BadRequest, "Get Books Paging Error!!!", e.InnerException?.Message);
+                    Metadata = new PagingMetadata
+                    {
+                        Page = request.Page,
+                        Size = request.Size,
+                        Total = response.PagingQueryable(request.Page, request.Size).Item1
+                    },
+                    Data = result.ToList()
+                };
                 }
+            catch (Exception e)
+            {
+
+                throw new CrudException(HttpStatusCode.BadRequest, "Get Books Paging Error!!!", e.InnerException?.Message);
+            }
         }
         public async Task<BaseResponseViewModel<BookReponseModel>> UpdateBook(int id, BookRequestModel model)
         {

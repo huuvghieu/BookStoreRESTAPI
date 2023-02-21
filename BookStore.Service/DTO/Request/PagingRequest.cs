@@ -16,8 +16,6 @@ namespace BookStore.Service.DTO.Request
         public int Size { get; set; } = 10;
 
         public int Total { get; set; }
-        [String]
-        public string? KeySearch { get; set; }
 
     }
 }
