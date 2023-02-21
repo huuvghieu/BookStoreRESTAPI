@@ -17,5 +17,6 @@ namespace DataAcess.ResponseModels
         public int BookId { get; set; }
         public int Quantity { get; set; }
         public double Price { get; set; }
+        public int ReturnedQuantity { get; set; }
     }
 }

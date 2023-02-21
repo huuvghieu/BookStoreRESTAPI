@@ -57,11 +57,10 @@ namespace BookStore.Service.Service.ImplService
                     throw new Exception();
 
                 //quantity trả mà lớn hơn quantity mượn => bảo lỗi
-                if (returnRequest.Quantity > orderDetail.Quantity) 
+                if (returnRequest.Quantity > orderDetail.Quantity - orderDetail.ReturnedQuantity) 
                     throw new Exception();
 
-                //điểu chỉnh quantity của orderDetail
-                int newQuantity = orderDetail.Quantity - returnRequest.Quantity;
+      
                 if (returnRequest.Quantity > orderDetail.Quantity) throw new Exception();
 
                 var book = _unitOfWork.Repository<Book>().GetAll()
@@ -71,16 +70,16 @@ namespace BookStore.Service.Service.ImplService
 
                 //2 trường hợp:
                 // TH1: trả hết 
-                if (newQuantity == 0)
+                if (orderDetail.Quantity - returnRequest.Quantity - orderDetail.ReturnedQuantity == 0)
                 {
-                    orderDetail.Quantity = newQuantity; // set quanity của orderDetail về 0
+                    orderDetail.ReturnedQuantity += returnRequest.Quantity;
                     book.CurrentQuantity += returnRequest.Quantity; // update lại số lượng sách có trong kho
                 }
 
                 // TH2: không trả đủ
-                if (newQuantity > 0)
+                if (orderDetail.Quantity - returnRequest.Quantity - orderDetail.ReturnedQuantity > 0)
                 {
-                    orderDetail.Quantity = newQuantity; // set quanity của orderDetail còn dư
+                    orderDetail.ReturnedQuantity += returnRequest.Quantity;
                     book.CurrentQuantity += returnRequest.Quantity; // update lại số lượng sách có trong kho
                 }
 
@@ -88,7 +87,7 @@ namespace BookStore.Service.Service.ImplService
                 int check = 0;
                 foreach (var item in orderDetailList)
                 {
-                    if (item.Quantity == 0)
+                    if (item.Quantity == item.ReturnedQuantity)
                     {
                         check++;
                     }

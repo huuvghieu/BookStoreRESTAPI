@@ -85,6 +85,7 @@ namespace BookStore.Service
                     orderDetail.Quantity = detail.Quantity;
                     orderDetail.Price = product.Price * detail.Quantity;
                     orderDetail.BookId = product.BookId;
+                    orderDetail.ReturnedQuantity = 0;
 
                     listOrderDetail.Add(orderDetail);
 
@@ -249,6 +250,7 @@ namespace BookStore.Service
                         Quantity = a.Quantity,
                         BookImg = _unitOfWork.Repository<Book>()
                         .GetAll().FirstOrDefault(a => a.BookId == a.BookId).BookImg,
+                        ReturnedQuantity = a.ReturnedQuantity,
                         BookName = a.BookName,
 
                     }))
