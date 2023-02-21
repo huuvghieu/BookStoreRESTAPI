@@ -29,7 +29,7 @@ namespace BookStore.Service.Service.ImplService
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        public async Task<BaseResponseViewModel<UserResponse>> DeleteUser(int id)
+        public async Task<NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<UserResponse>> DeleteUser(int id)
         {
             var user = await _unitOfWork.Repository<User>().GetAsync(u => u.UserId == id);
             try
@@ -40,7 +40,7 @@ namespace BookStore.Service.Service.ImplService
                 }
                 _unitOfWork.Repository<User>().Delete(user);
                 await _unitOfWork.CommitAsync();
-                return new BaseResponseViewModel<UserResponse>()
+                return new NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<UserResponse>()
                 {
                     Status = new StatusViewModel
                     {
@@ -57,7 +57,7 @@ namespace BookStore.Service.Service.ImplService
             }
         }
 
-        public async Task<BaseResponseViewModel<UserResponse>> GetUserByID(int id)
+        public async Task<NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<UserResponse>> GetUserByID(int id)
         {
             try
             {
@@ -66,7 +66,7 @@ namespace BookStore.Service.Service.ImplService
                     throw new Exception();
                 }
                 var response = await _unitOfWork.Repository<User>().GetAsync(u => u.UserId == id);
-                return new BaseResponseViewModel<UserResponse>()
+                return new NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<UserResponse>()
                 {
                     Status = new StatusViewModel
                     {
@@ -84,50 +84,24 @@ namespace BookStore.Service.Service.ImplService
             }
         }
 
-        public async Task<BaseResponsePagingViewModel<UserResponse>> GetUsers(PagingRequest pagingRequest)
+        public async Task<BasePagingViewModel<UserResponse>> GetUsers(PagingRequest pagingRequest, UserRequest userRequest)
         {
             try
             {
-                if(pagingRequest.PagingModel == null)
-                {
-                    pagingRequest.PagingModel = new PagingMetadata();
-                }
-                if (pagingRequest.PagingModel.Page == 0)
-                {
-                    pagingRequest.PagingModel.Page = 1;
-                }
-                if (pagingRequest.PagingModel.Size == 0)
-                {
-                    pagingRequest.PagingModel.Size = 10;
-                }
-                var filter = new UserResponse();
+                var filter = _mapper.Map<UserResponse>(userRequest);
                 filter.SortDirection = pagingRequest.SortDirection;
                 filter.SortProperty = pagingRequest.SortProperty;
-                PropertyInfo[] properties = filter.GetType().GetProperties();
-                foreach (PropertyInfo propertyInfo in properties)
-                {
-                    if (propertyInfo.Name == pagingRequest.SortProperty)
-                    {
-                       propertyInfo.SetValue(filter, pagingRequest.KeySearch);
-                    }
-                };
 
                 var rsFilter = _unitOfWork.Repository<User>().GetAll()
                                 .ProjectTo<UserResponse>(_mapper.ConfigurationProvider)
-                                .DynamicSort(filter).DynamicFilter(filter);
-
-
-                var res = rsFilter.PagingQueryable(pagingRequest.PagingModel.Page, pagingRequest.PagingModel.Size);
-
-                return new BaseResponsePagingViewModel<UserResponse>()
+                                .Where(a=>a.DateOfBirth>=filter.DateOfBirth)
+                                .DynamicSort(filter).DynamicFilter(filter)
+                                .PagingQueryable(pagingRequest.Page, pagingRequest.PageSize).Item2;
+               
+                return new BasePagingViewModel<UserResponse>()
                 {
-                    Metadata = new PagingMetadata
-                    {
-                        Page = pagingRequest.PagingModel.Page,
-                        Size = pagingRequest.PagingModel.Size,
-                        Total = res.Item1
-                    },
-                    Data = res.Item2.ToList()
+                   Metadata=pagingRequest,
+                    Data = rsFilter.ToList()
                 };
             }
             catch (Exception ex)
@@ -137,7 +111,7 @@ namespace BookStore.Service.Service.ImplService
 
         }
 
-        public async Task<BaseResponseViewModel<UserResponse>> PutUser(int id, UserRequest model)
+        public async Task<NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<UserResponse>> PutUser(int id, UserRequest model)
         {
             var user = await _unitOfWork.Repository<User>().GetAsync(u => u.UserId == id);
             try
@@ -149,7 +123,7 @@ namespace BookStore.Service.Service.ImplService
                  var response = _mapper.Map<UserRequest, User>(model, user);
                 await _unitOfWork.Repository<User>().Update(response, id);
                 await _unitOfWork.CommitAsync();
-                return new BaseResponseViewModel<UserResponse>()
+                return new NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<UserResponse>()
                 {
                     Status = new StatusViewModel
                     {

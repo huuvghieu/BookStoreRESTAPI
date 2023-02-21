@@ -17,9 +17,9 @@ public partial class Book
 
     public int CateId { get; set; }
 
-    public int Price { get; set; }
+    public double Price { get; set; }
 
-    public Category Cate { get; set; } 
+    public virtual Category Cate { get; set; } = null!;
 
     public virtual ICollection<OrderDetail> OrderDetails { get; } = new List<OrderDetail>();
 }

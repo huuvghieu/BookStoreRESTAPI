@@ -1,5 +1,6 @@
 ﻿
 using BookStore.Service.DTO.Request;
+using BookStore.Service.DTO.Response;
 using DataAcess.RequestModels;
 using DataAcess.ResponseModels;
 using NTQ.Sdk.Core.CustomModel;
@@ -16,10 +17,9 @@ namespace BookStore.Service
     public interface IBookRepository
     {
         Task<BaseResponseViewModel<BookReponseModel>> CreateBook(BookRequestModel model);
-        Task<BaseResponseViewModel<List<BookReponseModel>>> GetBestSellers();
         Task<BaseResponseViewModel<BookReponseModel>> GetBook(int id);
         Task<BaseResponseViewModel<List<BookReponseModel>>> GetBookByCateById(int cateId);
-        Task<BaseResponsePagingViewModel<BookReponseModel>> GetBooks(PagingRequest? request,BookRequestModel? model);
+        Task<BasePagingViewModel<BookReponseModel>> GetBooks(PagingRequest? request,BookRequestModel? model);
         Task<BaseResponseViewModel<BookReponseModel>>  UpdateBook(int id, BookRequestModel book);
         Task<BaseResponseViewModel<BookReponseModel>> DeleteBook(int id);
 

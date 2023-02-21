@@ -6,23 +6,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NTQ.Sdk.Core.Attributes;
+using System.ComponentModel.DataAnnotations;
 
 namespace BookStore.Service.DTO.Response
 {
     public class UserResponse : SortModel
     {
+        [Key]
         public int UserId { get; set; }
-        [String]
+        [StringAttribute]
         public string? UserName { get; set; }
-        [String]
+        [StringAttribute]
         public string? Address { get; set; }
-
+        [SkipAttribute]
         public DateTime DateOfBirth { get; set; }
-        [String]
+        [StringAttribute]
         public string? Gender { get; set; }
+        [StringAttribute]
         public string? Password { get; set; }
-        [String]
+        [StringAttribute]
         public string? Email { get; set; }
-        public virtual ICollection<OrderBook> OrderBooks { get; } = new List<OrderBook>();
     }
 }

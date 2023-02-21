@@ -19,9 +19,9 @@ namespace BookStore.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<UserResponse>>> GetUsers([FromQuery] PagingRequest pagingRequest)
+        public async Task<ActionResult<List<UserResponse>>> GetUsers([FromQuery] PagingRequest pagingRequest,[FromQuery]UserRequest userRequest)
         {
-            var rs = await _userService.GetUsers(pagingRequest);
+            var rs = await _userService.GetUsers(pagingRequest,userRequest);
             return Ok(rs);
         }
 

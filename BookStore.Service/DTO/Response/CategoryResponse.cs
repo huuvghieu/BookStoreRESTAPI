@@ -11,8 +11,9 @@ namespace BookStore.Service.DTO.Response
 {
     public class CategoryResponse : SortModel
     {
-        public int CateId { get; set; }
-        [String]
+        [IntAttribute]
+        public int? CateId { get; set; } = null;
+        [StringAttribute]
         public string? CateName { get; set; }
 
 

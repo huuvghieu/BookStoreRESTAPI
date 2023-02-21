@@ -17,9 +17,9 @@ namespace BookStore.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<CategoryResponse>>> GetCategories([FromQuery] PagingRequest pagingRequest)
+        public async Task<ActionResult<List<CategoryResponse>>> GetCategories([FromQuery] PagingRequest pagingRequest, [FromQuery]CategoryRequest categoryRequest)
         {
-            var rs = await _categoryService.GetCategories(pagingRequest);
+            var rs = await _categoryService.GetCategories(pagingRequest,categoryRequest);
             return Ok(rs);
         }
 

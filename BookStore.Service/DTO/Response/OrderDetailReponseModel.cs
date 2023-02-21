@@ -11,16 +11,11 @@ namespace DataAcess.ResponseModels
 {
     public class OrderDetailReponseModel
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int OrderDetailId { get; set; }
-        [ForeignKey("OrderBook")]
-        public int OrderId { get; set; }
-        public OrderBook OrderBook { get; set; }
+        public string BookName { get; set; } = null;
+        public string? BookImg { get; set; }
         [ForeignKey("Book")]
         public int BookId { get; set; }
-        public Book Book { get; set; }
         public int Quantity { get; set; }
-        public int Price { get; set; }
+        public double Price { get; set; }
     }
 }

@@ -22,7 +22,7 @@ namespace BookStore_API.Controllers
            _bookRepository = bookRepository;
         }
         [HttpGet("paging")]
-        public async Task<ActionResult<List<BookReponseModel>>> GetBooksPaging([FromQuery]BookRequestModel model, [FromQuery] PagingRequest request)
+        public async Task<ActionResult<List<BookReponseModel>>> GetBooksPaging([FromQuery]BookRequestModel model, [FromQuery] PagingRequest? request)
         {
             var rs = await _bookRepository.GetBooks(request, model);
             return Ok(rs);

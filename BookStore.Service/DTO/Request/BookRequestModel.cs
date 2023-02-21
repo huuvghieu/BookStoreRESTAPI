@@ -15,6 +15,6 @@ namespace DataAcess.RequestModels
         public int? CurrentQuantity { get; set; } = null;
         [ForeignKey("Category")]
         public int? CateID { get; set; }=null;
-        public int? Price { get; set; }=null;
+        public double? Price { get; set; }=null;
     }
 }

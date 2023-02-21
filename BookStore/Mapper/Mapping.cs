@@ -31,6 +31,7 @@ namespace BusinessTier.Mapper
 
             CreateMap<RegisterationRequest, User>();
             CreateMap<UserResponse, User>().ReverseMap();
+            CreateMap<UserRequest, UserResponse>().ReverseMap();
             CreateMap<UserRequest, User>();
         }
 

@@ -1,4 +1,5 @@
 ﻿using BookStore.Service.DTO.Request;
+using BookStore.Service.DTO.Response;
 using DataAcess.RequestModels;
 using DataAcess.ResponseModels;
 using NTQ.Sdk.Core.CustomModel;
@@ -13,9 +14,9 @@ namespace BookStore.Service.Service.InterfaceService
 {
     public interface IOrderRepository
     {
-        Task<BaseResponseViewModel<OrderReponseModel>> CreateOrder(List<OrderCreateRequestModel> model,int userId);
+        Task<BaseResponseViewModel<List<OrderReponseModel>>> CreateOrder(OrderCreateRequestModel request);
         Task<BaseResponseViewModel<OrderReponseModel>> GetOrder(int id);
-        Task<BaseResponsePagingViewModel<OrderReponseModel>> GetOrders(PagingRequest request, OrderRequestModel model);
+        Task<BasePagingViewModel<OrderReponseModel>> GetOrders(PagingRequest request, OrderRequestModel model);
         Task<BaseResponseViewModel<OrderDetailReponseModel>>UpdateItemOfOrder(int id, OrderDetailUpdateRequestModel order);
         Task<BaseResponseViewModel<OrderDetailReponseModel>> DeleteItemOfOrder(int id);
 

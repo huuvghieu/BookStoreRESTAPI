@@ -7,6 +7,7 @@ using BookStore.Data.Models;
 using BookStore.Data.UnitOfWork;
 using BookStore.Service;
 using BookStore.Service.DTO.Request;
+using BookStore.Service.DTO.Response;
 using BookStore.Service.Exceptions;
 using BookStore.Service.Helpers;
 using BookStore.Service.Service.InterfaceService;
@@ -41,39 +42,86 @@ namespace BookStore.Service
             _mapper = mapper;
         }
 
-        public async Task<BaseResponseViewModel<OrderReponseModel>> CreateOrder(List<OrderCreateRequestModel> model, int userId)
+        public async Task<BaseResponseViewModel<List<OrderReponseModel>>> CreateOrder(OrderCreateRequestModel request)
         {
             try
             {
-                if (model == null) throw new CrudException(HttpStatusCode.BadRequest, "Input Invalid", "");
-                var user=_unitOfWork.Repository<User>().GetAll().FirstOrDefault(a=>a.UserId==userId);
-                if(user== null) throw new CrudException(HttpStatusCode.NotFound, "User Not Found", "");
-                var order = _unitOfWork.Repository<OrderBook>().GetAll().Where(a => a.UserId == userId 
+                List<OrderReponseModel> listOrderResult = new List<OrderReponseModel>();
+
+                //validate xem order cua user co order nao dang qua han khong
+                var order = _unitOfWork.Repository<OrderBook>().GetAll().Where(a => a.UserId == request.UserId 
                 && a.Status== (int)StatusType.StatusOrder.Borrowing && a.OrderReturnDate<DateTime.Now);
-                if (!order.IsNullOrEmpty()) throw new CrudException(HttpStatusCode.BadRequest, "", "");
-                OrderReponseModel response = new OrderReponseModel()
+
+                if (!order.IsNullOrEmpty()) 
+                    throw new CrudException(HttpStatusCode.BadRequest, "Borrowing Book Fail", "");
+                
+                OrderBook orderBook = new OrderBook();
+                orderBook.OrderDate = DateTime.Now;
+                orderBook.OrderReturnDate = DateTime.Now.AddMonths(2);
+                orderBook.Status = (int)StatusType.StatusOrder.Borrowing;
+                orderBook.User = _unitOfWork.Repository<User>().GetAll()
+                .FirstOrDefault(x => x.UserId == request.UserId);
+                orderBook.UserId = request.UserId;
+
+                List<OrderDetail> listOrderDetail = new List<OrderDetail>();
+                List<OrderDetailReponseModel> listOrderDetailResponse = new List<OrderDetailReponseModel>();
+                orderBook.TotalPrice = 0;
+
+                foreach (var detail in request.OrderDetails)
                 {
-                   OrderDate = DateTime.Now,
-                   OrderReturnDate = DateTime.Now.AddMonths(2),
-                   UserId = userId,
-                   Status = 1
-            };
-                OrderBook o = _mapper.Map<OrderBook>(response);
-                await _unitOfWork.Repository<OrderBook>().CreateAsync(o);
-                await _unitOfWork.CommitAsync();
-                foreach (var item in model)
-                {
-                    var book = _unitOfWork.Repository<Book>().GetAll().FirstOrDefault(x => x.BookId == item.BookId);
-                    if (item.Quantity > book.CurrentQuantity) throw new CrudException(HttpStatusCode.BadRequest, "Information Invalid!", "");
-                    var m = _mapper.Map<OrderDetail>(item);
-                    m.Price = (item.Quantity * (book.Price));
-                    m.OrderId = o.OrderId;
-                    await _unitOfWork.Repository<OrderDetail>().CreateAsync(m);
-                    book.CurrentQuantity = book.CurrentQuantity - item.Quantity;
-                    await _unitOfWork.Repository<Book>().Update(book, book.BookId);
-                    await _unitOfWork.CommitAsync();
+                    //Add orderDetail vào listOderDetail
+                    var product = _unitOfWork.Repository<Book>().GetAll()
+                        .Include(x => x.Cate)
+                        .Where(x => x.BookId == detail.BookId)
+                        .FirstOrDefault();
+                    orderBook.TotalPrice += (double)(product.Price*detail.Quantity);
+
+                    //check quantity order có lớn hơn currentQuantity của Book
+                    if (detail.Quantity > product.CurrentQuantity) 
+                        throw new CrudException(HttpStatusCode.BadRequest, "Information Invalid!", "");
+
+                    OrderDetail orderDetail = new OrderDetail();
+                    orderDetail.BookName = product.BookName;
+                    orderDetail.Quantity = detail.Quantity;
+                    orderDetail.Price = product.Price * detail.Quantity;
+                    orderDetail.BookId = product.BookId;
+
+                    listOrderDetail.Add(orderDetail);
+
+                    // update lai currentQuantity của book 
+                    product.CurrentQuantity = product.CurrentQuantity - detail.Quantity;
+                    await _unitOfWork.Repository<Book>().Update(product, product.BookId);
+
+                    //Add orderDetailResponse vào list OrderDetailResponse
+                    var orderResult =_mapper.Map<OrderDetail,OrderDetailReponseModel>(orderDetail);
+                    orderResult.BookImg= product.BookImg;
+                    listOrderDetailResponse.Add(orderResult);
                 }
-                return new BaseResponseViewModel<OrderReponseModel>()
+                //gán listOrderDetail vào List<OrderDetail> của OrderBook
+                orderBook.OrderDetails = listOrderDetail;
+
+                //tạo orderBook và save changes
+                await _unitOfWork.Repository<OrderBook>().CreateAsync(orderBook);
+                await _unitOfWork.CommitAsync();
+
+                //add order vào list kết quả để return
+                var user = _mapper.Map<User, UserResponse>(orderBook.User);
+
+                var result = _unitOfWork.Repository<OrderBook>().GetAll()
+                    .Include(x => x.OrderDetails)
+                    .Select(x => new OrderReponseModel()
+                    {
+                        OrderId = x.OrderId,
+                        OrderDate = x.OrderDate,
+                        OrderReturnDate = x.OrderReturnDate,
+                        Status = x.Status,
+                        User = user,
+                        OrderDetail = listOrderDetailResponse
+                    }).FirstOrDefault();
+
+                listOrderResult.Add(result);
+
+                return new BaseResponseViewModel<List<OrderReponseModel>>()
                 {
                     Status = new StatusViewModel()
                     {
@@ -81,7 +129,7 @@ namespace BookStore.Service
                         Success = true,
                         ErrorCode = 0
                     },
-                    Data = response
+                    Data = listOrderResult
                 };
             }
 
@@ -94,13 +142,27 @@ namespace BookStore.Service
         public async Task<BaseResponseViewModel<OrderDetailReponseModel>> DeleteItemOfOrder(int id)
         {
             var rs = _unitOfWork.Repository<OrderDetail>().GetAll().FirstOrDefault(a => a.OrderDetailId == id);
-            if (rs == null) throw new CrudException(HttpStatusCode.NotFound, "Order Detail ID Is Not Found", "");
+
+            if (rs == null) 
+                throw new CrudException(HttpStatusCode.NotFound, "Order Detail ID Is Not Found", "");
             try
             {
+                //xoa orderDetail 
                  _unitOfWork.Repository<OrderDetail>().Delete(rs);
+
+                //update lai currentQuantity cua Book
                 var book = _unitOfWork.Repository<Book>().GetAll().FirstOrDefault(x => x.BookId == rs.BookId);
+
                 book.CurrentQuantity = book.CurrentQuantity + rs.Quantity;
+
                 await _unitOfWork.Repository<Book>().Update(book, book.BookId);
+
+                //update lai totalPrice cua orderBook
+                var orderBook=_unitOfWork.Repository<OrderBook>().GetAll().FirstOrDefault(x=>x.OrderId==rs.OrderId);
+                orderBook.TotalPrice-=rs.Price;
+
+                await _unitOfWork.Repository<OrderBook>().Update(orderBook, orderBook.OrderId);
+
                 await _unitOfWork.CommitAsync();
                 return new BaseResponseViewModel<OrderDetailReponseModel>()
                 {
@@ -125,23 +187,28 @@ namespace BookStore.Service
             {
                 var model = _unitOfWork.Repository<OrderBook>().GetAll().Where(a => a.OrderId == id)
                 .Select(a => new OrderReponseModel
+                {
+                    OrderDate = a.OrderDate,
+                    OrderId = a.OrderId,
+                    OrderReturnDate = a.OrderReturnDate,
+                    Status = a.Status,
+                    User = _mapper.Map<User,UserResponse>(a.User),
+                    OrderDetail = new List<OrderDetailReponseModel>
+                    (a.OrderDetails.Select(a => new OrderDetailReponseModel
                     {
-                        OrderDate = a.OrderDate,
-                        OrderId = a.OrderId,
-                        OrderReturnDate = a.OrderReturnDate,
-                        Status = a.Status,
-                        UserId = a.UserId,
-                        User = a.User,
-                        OrderDetail = new List<OrderDetailReponseModel>(a.OrderDetails.Select(a => new OrderDetailReponseModel
-                        {
-                            OrderId = a.OrderId,
-                            BookId = a.BookId,
-                            Book = a.Book,
-                            OrderDetailId = a.OrderDetailId,
-                            Price=a.Price,
-                            Quantity=a.Quantity
-                        }))}).SingleOrDefault();
-                if (model == null) throw new CrudException(HttpStatusCode.NotFound, "Order Id Is Not Found", "");
+                        BookId = a.BookId,
+                        Price = a.Price,
+                        Quantity = a.Quantity,
+                        BookImg=_unitOfWork.Repository<Book>()
+                        .GetAll().FirstOrDefault(a=>a.BookId==a.BookId).BookImg,
+                        BookName=a.BookName,
+                        
+                    }))
+                }).SingleOrDefault();
+
+                if (model == null) 
+                    throw new CrudException(HttpStatusCode.NotFound, "Order Id Is Not Found", "");
+
                 return new BaseResponseViewModel<OrderReponseModel>()
                 {
                     Status = new StatusViewModel()
@@ -158,50 +225,41 @@ namespace BookStore.Service
                 throw new CrudException(HttpStatusCode.BadRequest, "Get Order By Id Error !", ex.InnerException?.Message);
             }
         }
-        public async Task<BaseResponsePagingViewModel<OrderReponseModel>> GetOrders(PagingRequest request, OrderRequestModel model)
+        public async Task<BasePagingViewModel<OrderReponseModel>> GetOrders(PagingRequest request, OrderRequestModel model)
         {
             try
             {
-                if (request.PagingModel == null)
-                {
-                    request.PagingModel = new PagingMetadata();
-                }
-                if (request.PagingModel.Page == 0)
-                {
-                    request.PagingModel.Page = 1;
-                }
-                if (request.PagingModel.Size == 0)
-                {
-                    request.PagingModel.Size = 10;
-                }
                 var filter = _mapper.Map<OrderReponseModel>(model);
                 filter.SortDirection = request.SortDirection;
                 filter.SortProperty = request.SortProperty;
+
                 var response = _unitOfWork.Repository<OrderBook>().GetAll()
-                .Select(a => new OrderReponseModel
-                {
-                    OrderDate = a.OrderDate,
-                    OrderId = a.OrderId,
-                    OrderReturnDate = a.OrderReturnDate,
-                    Status = a.Status,
-                    UserId = a.UserId,
-                    User = a.User,
-                    OrderDetail = new List<OrderDetailReponseModel>(a.OrderDetails.Select(a => new OrderDetailReponseModel
+                 .Select(a => new OrderReponseModel
+                 {
+                     OrderDate = a.OrderDate,
+                     OrderId = a.OrderId,
+                     OrderReturnDate = a.OrderReturnDate,
+                     Status = a.Status,
+                     User = _mapper.Map<User, UserResponse>(a.User),
+                     OrderDetail = new List<OrderDetailReponseModel>
+                    (a.OrderDetails.Select(a => new OrderDetailReponseModel
                     {
-                        OrderId = a.OrderId,
                         BookId = a.BookId,
-                        Book = a.Book,
-                        OrderDetailId = a.OrderDetailId,
                         Price = a.Price,
-                        Quantity = a.Quantity
+                        Quantity = a.Quantity,
+                        BookImg = _unitOfWork.Repository<Book>()
+                        .GetAll().FirstOrDefault(a => a.BookId == a.BookId).BookImg,
+                        BookName = a.BookName,
+
                     }))
-                });
-                var rs = response.Where(a => a.OrderDate >= model.OrderDate && a.OrderReturnDate >= model.OrderReturnDate).DynamicFilter(filter).DynamicSort(filter);
-                var result = rs.PagingQueryable(request.PagingModel.Page, request.PagingModel.Size).Item2;
-                    return new BaseResponsePagingViewModel<OrderReponseModel>()
+                 })
+                .Where(a => a.OrderDate >= model.OrderDate && a.OrderReturnDate >= model.OrderReturnDate).DynamicFilter(filter).DynamicSort(filter)
+                .PagingQueryable(request.Page, request.PageSize).Item2;
+
+                    return new BasePagingViewModel<OrderReponseModel>()
                     {
-                        Data = result.ToList(),
-                        Metadata = request.PagingModel
+                        Data = response.ToList(),
+                        Metadata = request
                     };
             }
             catch (Exception e)
@@ -215,15 +273,29 @@ namespace BookStore.Service
        public async Task<BaseResponseViewModel<OrderDetailReponseModel>>UpdateItemOfOrder(int id, OrderDetailUpdateRequestModel order)
         {
             var rs = _unitOfWork.Repository<OrderDetail>().GetAll().FirstOrDefault(a => a.OrderDetailId == id);
-            if (rs == null) throw new CrudException(HttpStatusCode.NotFound, "", "");
+
+            if (rs == null) 
+                throw new CrudException(HttpStatusCode.NotFound, "", "");
+
             try
             {
+                //update lai currentQuantity cua Book
                 var book = _unitOfWork.Repository<Book>().GetAll().FirstOrDefault(x => x.BookId == rs.BookId);
+
                 book.CurrentQuantity = book.CurrentQuantity - (order.Quantity - rs.Quantity);
+
                 await _unitOfWork.Repository<Book>().Update(book, book.BookId);
+
+                //update lai totalPrice cua order
+                var orderBook = _unitOfWork.Repository<OrderBook>().GetAll().FirstOrDefault(x => x.OrderId == rs.OrderId);
+                orderBook.TotalPrice = orderBook.TotalPrice - rs.Price + order.Quantity * book.Price;
+                await _unitOfWork.Repository<OrderBook>().Update(orderBook, orderBook.OrderId);
+
+                //update lai price cua orderDetail
                 var updateOrder = _mapper.Map<OrderDetailUpdateRequestModel, OrderDetail>(order, rs);
                 updateOrder.Price=book.Price*updateOrder.Quantity;
                 await _unitOfWork.Repository<OrderDetail>().Update(updateOrder, id);
+
                 await _unitOfWork.CommitAsync();
                 return new BaseResponseViewModel<OrderDetailReponseModel>()
                 {

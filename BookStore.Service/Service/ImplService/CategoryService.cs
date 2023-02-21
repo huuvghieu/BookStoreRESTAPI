@@ -42,7 +42,7 @@ namespace BookStore.Service.Service.ImplService
                 }
                  _unitOfWork.Repository<Category>().Delete(category);
                 await _unitOfWork.CommitAsync();
-                return new BaseResponseViewModel<CategoryResponse>()
+                return new NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<CategoryResponse>()
                 {
                     Status = new StatusViewModel
                     {
@@ -59,44 +59,24 @@ namespace BookStore.Service.Service.ImplService
             }
         }
 
-        public async Task<BaseResponsePagingViewModel<CategoryResponse>> GetCategories(PagingRequest pagingRequest)
+        public async Task<BasePagingViewModel<CategoryResponse>> GetCategories(PagingRequest pagingRequest, CategoryRequest categoryRequest)
         {
             try
             {
-                if (pagingRequest.PagingModel == null)
-                {
-                    pagingRequest.PagingModel = new PagingMetadata();
-                }
-                if (pagingRequest.PagingModel.Page == 0)
-                {
-                    pagingRequest.PagingModel.Page = 1;
-                }
-                if (pagingRequest.PagingModel.Size == 0)
-                {
-                    pagingRequest.PagingModel.Size = 10;
-                }
-                var filter = new CategoryResponse();
+                var filter = _mapper.Map<CategoryResponse>(categoryRequest);
+       
                 filter.SortDirection = pagingRequest.SortDirection;
                 filter.SortProperty = pagingRequest.SortProperty;
-                filter.CateName = pagingRequest.KeySearch;
 
                 var rsFilter = _unitOfWork.Repository<Category>().GetAll()
                                 .ProjectTo<CategoryResponse>(_mapper.ConfigurationProvider)
-                                .DynamicSort(filter).DynamicFilter(filter);
-
-                var res = rsFilter.PagingQueryable(pagingRequest.PagingModel.Page, pagingRequest.PagingModel.Size);
-
-                return new BaseResponsePagingViewModel<CategoryResponse>()
+                                .DynamicSort(filter).DynamicFilter(filter)
+                                .PagingQueryable(pagingRequest.Page, pagingRequest.PageSize).Item2;
+                return new BasePagingViewModel<CategoryResponse>()
                 {
-                    Metadata = new PagingMetadata
-                    {
-                        Page = pagingRequest.PagingModel.Page,
-                        Size = pagingRequest.PagingModel.Size,
-                        Total = res.Item1
-                    },
-                    Data = res.Item2.ToList()
+                    Metadata=pagingRequest,
+                    Data = rsFilter.ToList()
                 };
-
 
             }
             catch(Exception ex)

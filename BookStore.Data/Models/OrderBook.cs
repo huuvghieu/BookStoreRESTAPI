@@ -11,11 +11,13 @@ public partial class OrderBook
 
     public DateTime OrderReturnDate { get; set; }
 
-    public int Status { get; set; }
+    public int? Status { get; set; }
 
-    public int UserId { get; set; }
+    public int? UserId { get; set; }
 
-    public virtual ICollection<OrderDetail> OrderDetails { get; } = new List<OrderDetail>();
+    public double? TotalPrice { get; set; }
+
+    public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
     public virtual User User { get; set; } = null!;
 }
