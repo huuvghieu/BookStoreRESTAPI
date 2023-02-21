@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using BookStore.Data.Models;
 using NTQ.Sdk.Core.ViewModels;
 using NTQ.Sdk.Core.Attributes;
+using BookStore.Service.DTO.Response;
 
 namespace DataAcess.ResponseModels
 {
@@ -21,11 +22,8 @@ namespace DataAcess.ResponseModels
         [Skip]
         public DateTime OrderReturnDate { get; set; }
         [IntAttribute]
-        public int? Status { get; set; }
-        [ForeignKey("User")]
-        [IntAttribute]
-        public int? UserId { get; set; }
-        public User User { get; set; }
+        public int? Status { get; set; } 
+        public UserResponse User { get; set; } 
         public List<OrderDetailReponseModel> OrderDetail { get; set; }
     }
 }

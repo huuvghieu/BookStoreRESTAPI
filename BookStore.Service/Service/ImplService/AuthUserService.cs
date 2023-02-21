@@ -42,13 +42,13 @@ namespace BookStore.Service.Service.ImplService
             return false;
         }
 
-        public async Task<BaseResponseViewModel<LoginResponse>> Login(LoginRequest loginRequest)
+        public async Task<NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<LoginResponse>> Login(LoginRequest loginRequest)
         {
             var user = await _unitOfWork.Repository<User>().GetAsync(u => u.Email == loginRequest.Email
                                                                      && u.Password == loginRequest.Password);
             if(user == null)
             {
-                return new BaseResponseViewModel<LoginResponse>()
+                return new NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<LoginResponse>()
                 {
                     Status = new StatusViewModel
                     {
@@ -76,7 +76,7 @@ namespace BookStore.Service.Service.ImplService
                 SigningCredentials = new(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return new BaseResponseViewModel<LoginResponse>()
+            return new NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<LoginResponse>()
             {
                 Status = new StatusViewModel
                 {
@@ -92,7 +92,7 @@ namespace BookStore.Service.Service.ImplService
             };
         }
 
-        public async Task<BaseResponseViewModel<UserResponse>> Registeration(RegisterationRequest registerationRequest)
+        public async Task<NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<UserResponse>> Registeration(RegisterationRequest registerationRequest)
         {
             try
             {
@@ -109,7 +109,7 @@ namespace BookStore.Service.Service.ImplService
                 user.Role = "customer";
                 await _unitOfWork.Repository<User>().CreateAsync(user);
                 await _unitOfWork.CommitAsync();
-                return new BaseResponseViewModel<UserResponse>()
+                return new NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<UserResponse>()
                 {
                     Status = new StatusViewModel
                     {

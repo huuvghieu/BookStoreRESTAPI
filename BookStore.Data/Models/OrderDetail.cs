@@ -10,10 +10,10 @@ public partial class OrderDetail
     public int OrderId { get; set; }
 
     public int BookId { get; set; }
-
+    public string BookName { get; set; } = null!;
     public int Quantity { get; set; }
 
-    public int Price { get; set; }
+    public double Price { get; set; }
 
     public virtual Book Book { get; set; } = null!;
 

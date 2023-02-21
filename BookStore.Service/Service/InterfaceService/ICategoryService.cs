@@ -11,7 +11,7 @@ namespace BookStore.Service.Service.InterfaceService
 {
     public interface ICategoryService
     {
-        Task<BaseResponsePagingViewModel<CategoryResponse>> GetCategories(PagingRequest pagingRequest);
+        Task<BasePagingViewModel<CategoryResponse>> GetCategories(PagingRequest pagingRequest, CategoryRequest categoryRequest);
         Task<BaseResponseViewModel<CategoryResponse>> PostCategory(CategoryRequest model);
         Task<BaseResponseViewModel<CategoryResponse>> PutCategory(int id, CategoryRequest model);
         Task<BaseResponseViewModel<CategoryResponse>> DeleteCategory(int id);

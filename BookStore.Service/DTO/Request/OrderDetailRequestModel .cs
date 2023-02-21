@@ -10,10 +10,8 @@ namespace DataAcess.RequestModels
 {
     public class OrderDetailRequestModel
     {
-        public int OrderId { get; set; }
         [ForeignKey("Book")]
         public int BookId { get; set; }
         public int Quantity { get; set; }
-        public int Price { get; set; }
     }
 }

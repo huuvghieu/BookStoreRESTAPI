@@ -33,17 +33,17 @@ namespace OrderStore_API.Controllers
             var rs = await _orderRepository.GetOrder(id);
             return Ok(rs);
         }
-        [HttpPost("{userId:int}")]
-        public async Task<ActionResult<OrderReponseModel>> CreateOrder([FromBody] List<OrderCreateRequestModel> model,int userId)
+        [HttpPost()]
+        public async Task<ActionResult<List<OrderReponseModel>>> CreateOrder([FromBody] OrderCreateRequestModel model)
         {
-            var rs=await _orderRepository.CreateOrder(model,userId);
-            return Ok();
+            var rs=await _orderRepository.CreateOrder(model);
+            return Ok(rs);
         }
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<OrderDetailReponseModel>> DeleteOrder(int id)
         {
             var rs = await _orderRepository.DeleteItemOfOrder(id);
-            return Ok();
+            return Ok(rs);
         }
         [HttpPut("{id:int}")]
         public async Task<ActionResult<OrderDetailReponseModel>>UpdateOrder(int id, [FromBody] OrderDetailUpdateRequestModel model)

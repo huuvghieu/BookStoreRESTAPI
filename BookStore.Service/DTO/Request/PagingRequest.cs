@@ -9,13 +9,13 @@ using static BookStore.Service.Helpers.SortType;
 
 namespace BookStore.Service.DTO.Request
 {
-    public class PagingRequest:SortModel
+    public class PagingRequest : SortModel
     {
         public int Page { get; set; } = 1;
-
-        public int Size { get; set; } = 10;
-
-        public int Total { get; set; }
+        public int PageSize { get; set; } = 10;
+        public int Total { get; set; } = 50;
+        [String]
+        public string? KeySearch { get; set; } = "";
 
     }
 }

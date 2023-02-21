@@ -13,7 +13,7 @@ namespace BookStore.Service.Service.InterfaceService
     public interface IAuthUserService
     {
         bool IsUniqueUser(string Email);
-        Task<BaseResponseViewModel<LoginResponse>> Login(LoginRequest loginRequest);
-        Task<BaseResponseViewModel<UserResponse>> Registeration(RegisterationRequest registerationRequest); 
+        Task<NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<LoginResponse>> Login(LoginRequest loginRequest);
+        Task<NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<UserResponse>> Registeration(RegisterationRequest registerationRequest); 
     }
 }

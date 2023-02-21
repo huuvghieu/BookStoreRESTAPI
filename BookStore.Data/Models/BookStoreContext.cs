@@ -51,7 +51,6 @@ public partial class BookStoreContext : DbContext
             entity.HasKey(e => e.OrderId);
 
             entity.Property(e => e.OrderId).HasColumnName("OrderID");
-            entity.Property(e => e.UserId).HasColumnName("UserID");
 
             entity.HasOne(d => d.User).WithMany(p => p.OrderBooks).HasForeignKey(d => d.UserId);
         });

@@ -28,7 +28,7 @@ namespace BookStore.Service.Service.ImplService
             _mapper = mapper;
         }
 
-        public async Task<BaseResponseViewModel<OrderReponseModel>> ReturnOrder(ReturnOrderRequest returnRequest, int userId)
+        public async Task<NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<OrderReponseModel>> ReturnOrder(ReturnOrderRequest returnRequest, int userId)
         {
             try
             {
@@ -114,7 +114,7 @@ namespace BookStore.Service.Service.ImplService
                 await _unitOfWork.CommitAsync();
                 await _unitOfWork.Repository<Book>().Update(orderDetail.Book, orderDetail.Book.BookId);
                 await _unitOfWork.CommitAsync();
-                return new BaseResponseViewModel<OrderReponseModel>()
+                return new NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<OrderReponseModel>()
                 {
                     Status = new StatusViewModel
                     {

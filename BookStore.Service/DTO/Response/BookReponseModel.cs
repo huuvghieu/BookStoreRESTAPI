@@ -28,7 +28,7 @@ namespace DataAcess.ResponseModels
         public int? CateId { get; set; } 
         public CategoryResponse Cate { get; set; }
         [IntAttribute]
-        public int? Price { get; set; }
+        public double? Price { get; set; }
         [IntAttribute]
         public int? CurrentQuantity { get; set; }
     }

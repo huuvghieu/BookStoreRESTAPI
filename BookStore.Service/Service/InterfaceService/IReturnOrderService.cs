@@ -12,6 +12,6 @@ namespace BookStore.Service.Service.InterfaceService
 {
     public interface IReturnOrderService
     {
-        Task<BaseResponseViewModel<OrderReponseModel>> ReturnOrder(ReturnOrderRequest returnRequest, int userId);
+        Task<NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<OrderReponseModel>> ReturnOrder(ReturnOrderRequest returnRequest, int userId);
     }
 }
