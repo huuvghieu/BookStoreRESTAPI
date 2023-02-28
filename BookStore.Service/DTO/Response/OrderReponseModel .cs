@@ -22,7 +22,9 @@ namespace DataAcess.ResponseModels
         [Skip]
         public DateTime OrderReturnDate { get; set; }
         [IntAttribute]
-        public int? Status { get; set; } 
+        public int? Status { get; set; }
+        [IntAttribute]
+        public double? TotalPrice { get; set; }
         public UserResponse User { get; set; } 
         public List<OrderDetailReponseModel> OrderDetail { get; set; }
     }

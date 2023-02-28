@@ -12,7 +12,7 @@ namespace BookStore.Service.DTO.Request
 
         public string? Address { get; set; }
 
-        public DateTime DateOfBirth { get; set; }
+        public DateTime DateOfBirth { get; set; } = (DateTime)System.Data.SqlTypes.SqlDateTime.MinValue;
 
         public string? Gender { get; set; }
 

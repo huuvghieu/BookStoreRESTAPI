@@ -99,11 +99,11 @@ namespace BookStore.Service.Service.ImplService
                 var isUnique = IsUniqueUser(registerationRequest.Email);
                 if (!isUnique)
                 {
-                    throw new Exception();
+                    throw new CrudException(HttpStatusCode.BadRequest, "User has already register", "");
                 }
                 if(registerationRequest == null)
                 {
-                    throw new Exception();
+                    throw new CrudException(HttpStatusCode.BadRequest, "User information is invalid", "");
                 }
                 var user = _mapper.Map<User>(registerationRequest);
                 user.Role = "customer";
