@@ -33,40 +33,69 @@ public partial class BookStoreContext : DbContext
     {
         modelBuilder.Entity<Book>(entity =>
         {
-            entity.Property(e => e.BookId).HasColumnName("BookID");
-            entity.Property(e => e.CateId).HasColumnName("CateID");
+            entity.HasKey(e => e.BookId).HasName("PK__Books__3DE0C207764B4F89");
+
+            entity.Property(e => e.BookDetail).HasMaxLength(1000);
+            entity.Property(e => e.BookImg).HasMaxLength(50);
+            entity.Property(e => e.BookName).HasMaxLength(50);
+
+            entity.HasOne(d => d.Cate).WithMany(p => p.Books)
+                .HasForeignKey(d => d.CateId)
+                .HasConstraintName("FK__Books__CateId__412EB0B6");
         });
 
         modelBuilder.Entity<Category>(entity =>
         {
-            entity.HasKey(e => e.CateId);
+            entity.HasKey(e => e.CateId).HasName("PK__Categori__27638D1482DF3D18");
 
-            entity.Property(e => e.CateId).HasColumnName("CateID");
+            entity.Property(e => e.CateName).HasMaxLength(50);
         });
 
         modelBuilder.Entity<OrderBook>(entity =>
         {
-            entity.HasKey(e => e.OrderId);
+            entity.HasKey(e => e.OrderId).HasName("PK__OrderBoo__C3905BCFC973181F");
 
-            entity.Property(e => e.OrderId).HasColumnName("OrderID");
+            entity.Property(e => e.OrderDate).HasColumnType("datetime");
+            entity.Property(e => e.OrderReturnDate).HasColumnType("datetime");
 
-            entity.HasOne(d => d.User).WithMany(p => p.OrderBooks).HasForeignKey(d => d.UserId);
+            entity.HasOne(d => d.User).WithMany(p => p.OrderBooks)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK__OrderBook__UserI__3C69FB99");
         });
 
         modelBuilder.Entity<OrderDetail>(entity =>
         {
-            entity.Property(e => e.OrderDetailId).HasColumnName("OrderDetailID");
-            entity.Property(e => e.BookId).HasColumnName("BookID");
-            entity.Property(e => e.OrderId).HasColumnName("OrderID");
+            entity.HasKey(e => e.OrderDetailId).HasName("PK__OrderDet__D3B9D36C3DD18B3E");
 
-            entity.HasOne(d => d.Book).WithMany(p => p.OrderDetails).HasForeignKey(d => d.BookId);
+            entity.Property(e => e.BookName).HasMaxLength(50);
 
-            entity.HasOne(d => d.Order).WithMany(p => p.OrderDetails).HasForeignKey(d => d.OrderId);
+            entity.HasOne(d => d.Book).WithMany(p => p.OrderDetails)
+                .HasForeignKey(d => d.BookId)
+                .HasConstraintName("FK__OrderDeta__BookI__44FF419A");
+
+            entity.HasOne(d => d.Order).WithMany(p => p.OrderDetails)
+                .HasForeignKey(d => d.OrderId)
+                .HasConstraintName("FK__OrderDeta__Order__440B1D61");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.HasKey(e => e.UserId).HasName("PK__Users__1788CC4CE12F1F13");
+
+            entity.Property(e => e.Address).HasMaxLength(100);
+            entity.Property(e => e.DateOfBirth).HasColumnType("datetime");
+            entity.Property(e => e.Email)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Gender)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+            entity.Property(e => e.Password).HasMaxLength(20);
+            entity.Property(e => e.Role)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasColumnName("role");
+            entity.Property(e => e.UserName).HasMaxLength(30);
         });
 
         OnModelCreatingPartial(modelBuilder);
