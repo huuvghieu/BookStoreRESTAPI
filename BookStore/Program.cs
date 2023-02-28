@@ -1,4 +1,5 @@
 
+using BookStore.Data.Extensions;
 using BookStore.Data.Models;
 using BookStore.Data.Repository;
 using BookStore.Data.UnitOfWork;
@@ -83,6 +84,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IAuthUserService, AuthUserService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReturnOrderService, ReturnOrderService>();
+builder.Services.AddScoped<ICacheService, CacheService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Azure;
+using BookStore.Data.Extensions;
 using BookStore.Data.Models;
 using BookStore.Data.UnitOfWork;
 using BookStore.Service.DTO.Request;
@@ -8,6 +9,7 @@ using BookStore.Service.DTO.Response;
 using BookStore.Service.Exceptions;
 using BookStore.Service.Helpers;
 using BookStore.Service.Service.InterfaceService;
+using DataAcess.ResponseModels;
 using Microsoft.AspNetCore.Server.IIS.Core;
 using Microsoft.EntityFrameworkCore;
 using NTQ.Sdk.Core.CustomModel;
@@ -26,21 +28,23 @@ namespace BookStore.Service.Service.ImplService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public CategoryService(IUnitOfWork unitOfWork, IMapper mapper)
+        private readonly ICacheService _cacheService;
+        public CategoryService(IUnitOfWork unitOfWork, IMapper mapper, ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _cacheService = cacheService;
         }
         public async Task<BaseResponseViewModel<CategoryResponse>> DeleteCategory(int id)
         {
             var category = await _unitOfWork.Repository<Category>().GetAsync(u => u.CateId == id);
             try
             {
-                if(id <= 0)
+                if (id <= 0)
                 {
                     throw new Exception();
                 }
-                 _unitOfWork.Repository<Category>().Delete(category);
+                _unitOfWork.Repository<Category>().Delete(category);
                 await _unitOfWork.CommitAsync();
                 return new NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<CategoryResponse>()
                 {
@@ -64,7 +68,7 @@ namespace BookStore.Service.Service.ImplService
             try
             {
                 var filter = _mapper.Map<CategoryResponse>(categoryRequest);
-       
+
                 filter.SortDirection = pagingRequest.SortDirection;
                 filter.SortProperty = pagingRequest.SortProperty;
 
@@ -74,12 +78,12 @@ namespace BookStore.Service.Service.ImplService
                                 .PagingQueryable(pagingRequest.Page, pagingRequest.PageSize).Item2;
                 return new BasePagingViewModel<CategoryResponse>()
                 {
-                    Metadata=pagingRequest,
+                    Metadata = pagingRequest,
                     Data = rsFilter.ToList()
                 };
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new CrudException(HttpStatusCode.BadRequest, "Get Categories Paging Error!!!", ex.InnerException?.Message);
             }
@@ -90,11 +94,30 @@ namespace BookStore.Service.Service.ImplService
         {
             try
             {
-                if (id <= 0 )
+                var cacheData = _cacheService.GetData<CategoryResponse>($"Category{id}");
+                if (cacheData == null)
                 {
-                    throw new Exception();
+                    if (id <= 0)
+                    {
+                        throw new CrudException(HttpStatusCode.BadRequest, "Id Invalid", "");
+                    }
+                    var response = await _unitOfWork.Repository<Category>().GetAsync(u => u.CateId == id);
+
+                    var expiryTime = DateTimeOffset.Now.AddMinutes(2);
+                    cacheData = _mapper.Map<CategoryResponse>(response);
+                    _cacheService.SetData<CategoryResponse>($"Category{id}", cacheData, expiryTime);
+
+                    return new BaseResponseViewModel<CategoryResponse>()
+                    {
+                        Status = new StatusViewModel
+                        {
+                            ErrorCode = 0,
+                            Message = "sucess",
+                            Success = true
+                        },
+                        Data = cacheData
+                    };
                 }
-                var response = await _unitOfWork.Repository<Category>().GetAsync(u => u.CateId == id);
                 return new BaseResponseViewModel<CategoryResponse>()
                 {
                     Status = new StatusViewModel
@@ -103,9 +126,8 @@ namespace BookStore.Service.Service.ImplService
                         Message = "sucess",
                         Success = true
                     },
-                    Data = _mapper.Map<CategoryResponse>(response)
+                    Data = cacheData
                 };
-
             }
             catch (Exception ex)
             {
@@ -123,7 +145,7 @@ namespace BookStore.Service.Service.ImplService
                 {
                     throw new Exception();
                 }
-                var response = _mapper.Map<CategoryRequest ,Category>(model);
+                var response = _mapper.Map<CategoryRequest, Category>(model);
                 await _unitOfWork.Repository<Category>().CreateAsync(response);
                 await _unitOfWork.CommitAsync();
                 return new BaseResponseViewModel<CategoryResponse>()
@@ -148,7 +170,7 @@ namespace BookStore.Service.Service.ImplService
             var category = await _unitOfWork.Repository<Category>().GetAsync(u => u.CateId == id);
             try
             {
-                if(category == null)
+                if (category == null)
                 {
                     throw new Exception();
                 }
@@ -166,7 +188,7 @@ namespace BookStore.Service.Service.ImplService
                     Data = _mapper.Map<CategoryResponse>(category)
                 };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new CrudException(HttpStatusCode.BadRequest, "Update Category Error!!!", ex.InnerException?.Message);
             }

@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Azure;
+using BookStore.Data.Extensions;
 using BookStore.Data.Models;
 using BookStore.Data.UnitOfWork;
 using BookStore.Service.DTO.Request;
@@ -23,11 +25,12 @@ namespace BookStore.Service.Service.ImplService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-
-        public UserService(IUnitOfWork unitOfWork, IMapper mapper)
+        private readonly ICacheService _cacheService;
+        public UserService(IUnitOfWork unitOfWork, IMapper mapper, ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _cacheService = cacheService;
         }
         public async Task<NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<UserResponse>> DeleteUser(int id)
         {
@@ -57,16 +60,37 @@ namespace BookStore.Service.Service.ImplService
             }
         }
 
-        public async Task<NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<UserResponse>> GetUserByID(int id)
+        public async Task<BaseResponseViewModel<UserResponse>> GetUserByID(int id)
         {
             try
             {
-                if (id <= 0)
+                var cacheData = _cacheService.GetData<UserResponse>($"User{id}");
+                if (cacheData == null)
                 {
-                    throw new Exception();
+
+                    if (id <= 0)
+                    {
+                        throw new CrudException(HttpStatusCode.BadRequest, "Id User Invalid", "");
+                    }
+                    var response = await _unitOfWork.Repository<User>().GetAsync(u => u.UserId == id);
+
+                    var expiryTime = DateTimeOffset.Now.AddMinutes(2);
+                    cacheData = _mapper.Map<UserResponse>(response);
+                    _cacheService.SetData<UserResponse>($"User{id}", cacheData, expiryTime);
+
+                    return new BaseResponseViewModel<UserResponse>()
+                    {
+                        Status = new StatusViewModel
+                        {
+                            ErrorCode = 0,
+                            Message = "sucess",
+                            Success = true
+                        },
+                        Data = cacheData
+                    };
                 }
-                var response = await _unitOfWork.Repository<User>().GetAsync(u => u.UserId == id);
-                return new NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<UserResponse>()
+
+                return new BaseResponseViewModel<UserResponse>()
                 {
                     Status = new StatusViewModel
                     {
@@ -74,9 +98,8 @@ namespace BookStore.Service.Service.ImplService
                         Message = "sucess",
                         Success = true
                     },
-                    Data = _mapper.Map<UserResponse>(response)
+                    Data = cacheData
                 };
-
             }
             catch (Exception ex)
             {
@@ -94,13 +117,13 @@ namespace BookStore.Service.Service.ImplService
 
                 var rsFilter = _unitOfWork.Repository<User>().GetAll()
                                 .ProjectTo<UserResponse>(_mapper.ConfigurationProvider)
-                                .Where(a=>a.DateOfBirth>=filter.DateOfBirth)
+                                .Where(a => a.DateOfBirth >= filter.DateOfBirth)
                                 .DynamicSort(filter).DynamicFilter(filter)
                                 .PagingQueryable(pagingRequest.Page, pagingRequest.PageSize).Item2;
-               
+
                 return new BasePagingViewModel<UserResponse>()
                 {
-                   Metadata=pagingRequest,
+                    Metadata = pagingRequest,
                     Data = rsFilter.ToList()
                 };
             }
@@ -111,7 +134,7 @@ namespace BookStore.Service.Service.ImplService
 
         }
 
-        public async Task<NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<UserResponse>> PutUser(int id, UserRequest model)
+        public async Task<BaseResponseViewModel<UserResponse>> PutUser(int id, UserRequest model)
         {
             var user = await _unitOfWork.Repository<User>().GetAsync(u => u.UserId == id);
             try
@@ -120,7 +143,7 @@ namespace BookStore.Service.Service.ImplService
                 {
                     throw new Exception();
                 }
-                 var response = _mapper.Map<UserRequest, User>(model, user);
+                var response = _mapper.Map<UserRequest, User>(model, user);
                 await _unitOfWork.Repository<User>().Update(response, id);
                 await _unitOfWork.CommitAsync();
                 return new NTQ.Sdk.Core.CustomModel.BaseResponseViewModel<UserResponse>()

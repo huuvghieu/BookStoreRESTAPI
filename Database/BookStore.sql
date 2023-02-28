@@ -1,4 +1,6 @@
-﻿create database BookStore
+﻿drop database BookStore
+Go
+create database BookStore
 GO
 use BookStore
 CREATE TABLE Users(
@@ -41,6 +43,7 @@ CREATE TABLE OrderDetails(
 	OrderDetailId int identity(1,1) primary key not null,
 	OrderId int foreign key references OrderBooks(OrderId),
 	BookId int foreign key references Books(BookId),
+	ReturnedQuantity int ,
 	Quantity int not null,
 	Price float,
 	BookName nvarchar(50) not null
