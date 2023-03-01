@@ -8,6 +8,7 @@ using System.Net.NetworkInformation;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using IDatabase = StackExchange.Redis.IDatabase;
 
@@ -16,15 +17,14 @@ namespace BookStore.Data.Extensions
    
     public class CacheService : ICacheService
     {
-        private IDatabase _cacheDb;
-        public CacheService()
+        private IDistributedCache _distributedCache;
+        public CacheService(IDistributedCache distributed)
         {
-            var redis = ConnectionMultiplexer.Connect("127.0.0.1:6379");
-            _cacheDb=redis.GetDatabase();
+            _distributedCache=distributed;
         }
         public T GetData<T>(string key)
         {
-            var value=_cacheDb.StringGet(key);
+            var value=_distributedCache.GetString(key);
             if (!string.IsNullOrEmpty(value))
                 return JsonSerializer.Deserialize<T>(value);
             return default;
@@ -32,16 +32,19 @@ namespace BookStore.Data.Extensions
 
         public object RemoveData(string key)
         {
-            var _exist=_cacheDb.KeyExists(key);
-            if(_exist)
-                return _cacheDb.KeyDelete(key);
+            var _exist=_distributedCache.GetString(key);
+            if(_exist!=null)
+                return _distributedCache.RemoveAsync(key);
             return false;
         }
 
-        public bool SetData<T>(string key, T value, DateTimeOffset expirationTime)
+        public void SetData<T>(string key, T value, DateTimeOffset expirationTime)
         {
             var expirty = expirationTime.DateTime.Subtract(DateTime.Now);
-            return _cacheDb.StringSet(key,JsonSerializer.Serialize(value),expirty);
+             _distributedCache.SetString(key,JsonSerializer.Serialize(value), new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow =expirty 
+            });
         }
     }
 }

@@ -33,7 +33,7 @@ public partial class BookStoreContext : DbContext
     {
         modelBuilder.Entity<Book>(entity =>
         {
-           entity.HasKey(e => e.BookId).HasName("PK__Books__3DE0C207764B4F89");
+            entity.HasKey(e => e.BookId).HasName("PK__Books__3DE0C207764B4F89");
 
             entity.Property(e => e.BookDetail).HasMaxLength(1000);
             entity.Property(e => e.BookImg).HasMaxLength(50);
