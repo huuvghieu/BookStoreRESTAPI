@@ -77,7 +77,8 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddAutoMapper(typeof(Mapping));
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = builder.Configuration.GetConnectionString("RedisConnectionString");
+    options.Configuration = builder.Configuration["RedisConnectionString"];
+    //builder.Configuration.GetConnectionString("RedisConnectionString");
     options.InstanceName = "SampleInstance";
 });
 builder.Services.AddControllers().AddJsonOptions(x =>

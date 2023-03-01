@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Caching.Distributed;
+using ServiceStack;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -24,9 +25,22 @@ namespace BookStore.Data.Extensions
         }
         public T GetData<T>(string key)
         {
-            var value=_distributedCache.GetString(key);
-            if (!string.IsNullOrEmpty(value))
-                return JsonSerializer.Deserialize<T>(value);
+            try
+            {
+                byte[]? data = _distributedCache.Get(key);
+                if (data == null)
+                {
+                    return default;
+                }
+                return JsonSerializer.Deserialize<T>(Encoding.UTF8.GetString(data, 0, data.Length));
+                var value = _distributedCache?.GetString(key);
+            }
+            catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
+
             return default;
         }
 
