@@ -38,10 +38,6 @@ public partial class BookStoreContext : DbContext
             entity.Property(e => e.BookDetail).HasMaxLength(1000);
             entity.Property(e => e.BookImg).HasMaxLength(50);
             entity.Property(e => e.BookName).HasMaxLength(50);
-
-            entity.HasOne(d => d.Cate).WithMany(p => p.Books)
-                .HasForeignKey(d => d.CateId)
-                .HasConstraintName("FK__Books__CateId__412EB0B6");
         });
 
         modelBuilder.Entity<Category>(entity =>
