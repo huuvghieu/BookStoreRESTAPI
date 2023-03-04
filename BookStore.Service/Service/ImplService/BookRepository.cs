@@ -40,11 +40,11 @@ namespace BookStore.Service
         private readonly IMapper _mapper;
         private readonly ICacheService _cacheService;
 
-        IFirebaseConfig config = new FirebaseConfig
-        {
-            AuthSecret = "guEzEFK72W3mPyoL244xtL2T96yiDGF7UBah1AVh",
-            BasePath = "https://bookstoreapi-abbce-default-rtdb.firebaseio.com/"
-        };
+        //IFirebaseConfig config = new FirebaseConfig
+        //{
+        //    AuthSecret = "guEzEFK72W3mPyoL244xtL2T96yiDGF7UBah1AVh",
+        //    BasePath = "https://bookstoreapi-abbce-default-rtdb.firebaseio.com/"
+        //};
 
         public BookRepository(IUnitOfWork unitOfWork, IMapper mapper, ICacheService cache)
         {
@@ -59,10 +59,10 @@ namespace BookStore.Service
             {
                 if (model == null) throw new CrudException(HttpStatusCode.BadRequest, "Input Invalid", "");
 
-                IFirebaseClient _client = new FireSharp.FirebaseClient(config);
-                var data = model;
-                PushResponse response = _client.Push("Book/", data);
-                SetResponse setResponse = _client.Set("Book/" + data.BookName, data);
+                //IFirebaseClient _client = new FireSharp.FirebaseClient(config);
+                //var data = model;
+                //PushResponse response = _client.Push("Book/", data);
+                //SetResponse setResponse = _client.Set("Book/" + data.BookName, data);
 
                 var rs = _unitOfWork.Repository<Book>()
                     .GetAll()
@@ -128,7 +128,7 @@ namespace BookStore.Service
         {
             try
             {
-                var cacheData = _cacheService.GetData<BookReponseModel>($"Book{id}");
+                var cacheData = _cacheService.GetCacheValue<BookReponseModel>($"Book{id}");
                 if (cacheData == null)
                 {
 
@@ -141,7 +141,7 @@ namespace BookStore.Service
 
                     var expiryTime = DateTimeOffset.Now.AddMinutes(2);
                     cacheData = _mapper.Map<BookReponseModel>(model);
-                    _cacheService.SetData<BookReponseModel>($"Book{id}", cacheData, expiryTime);
+                    _cacheService.SetCacheValue<BookReponseModel>($"Book{id}", cacheData);
 
                     return new BaseResponseViewModel<BookReponseModel>()
                     {

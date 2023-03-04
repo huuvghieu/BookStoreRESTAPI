@@ -64,7 +64,7 @@ namespace BookStore.Service.Service.ImplService
         {
             try
             {
-                var cacheData = _cacheService.GetData<UserResponse>($"User{id}");
+                var cacheData = _cacheService.GetCacheValue<UserResponse>($"User{id}");
                 if (cacheData == null)
                 {
 
@@ -76,7 +76,7 @@ namespace BookStore.Service.Service.ImplService
 
                     var expiryTime = DateTimeOffset.Now.AddMinutes(2);
                     cacheData = _mapper.Map<UserResponse>(response);
-                    _cacheService.SetData<UserResponse>($"User{id}", cacheData, expiryTime);
+                    _cacheService.SetCacheValue<UserResponse>($"User{id}", cacheData);
 
                     return new BaseResponseViewModel<UserResponse>()
                     {

@@ -21,6 +21,7 @@ using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using BookStore.Data.Extensions;
 
 namespace BookStore.Service.Service.ImplService
 {
@@ -94,7 +95,7 @@ namespace BookStore.Service.Service.ImplService
         {
             try
             {
-                var cacheData = _cacheService.GetData<CategoryResponse>($"Category{id}");
+                var cacheData = _cacheService.GetCacheValue<CategoryResponse>($"Category{id}");
                 if (cacheData == null)
                 {
                     if (id <= 0)
@@ -102,10 +103,8 @@ namespace BookStore.Service.Service.ImplService
                         throw new CrudException(HttpStatusCode.BadRequest, "Id Invalid", "");
                     }
                     var response = await _unitOfWork.Repository<Category>().GetAsync(u => u.CateId == id);
-
-                    var expiryTime = DateTimeOffset.Now.AddMinutes(2);
                     cacheData = _mapper.Map<CategoryResponse>(response);
-                    _cacheService.SetData<CategoryResponse>($"Category{id}", cacheData, expiryTime);
+                    _cacheService.SetCacheValue<CategoryResponse>($"Category{id}", cacheData);
 
                     return new BaseResponseViewModel<CategoryResponse>()
                     {

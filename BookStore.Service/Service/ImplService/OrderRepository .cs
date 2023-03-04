@@ -194,7 +194,7 @@ namespace BookStore.Service
         {
             try
             {
-                var cacheData = _cacheService.GetData<OrderReponseModel>($"Order{id}");
+                var cacheData = _cacheService.GetCacheValue<OrderReponseModel>($"Order{id}");
 
                 if (cacheData == null)
                 {
@@ -224,7 +224,7 @@ namespace BookStore.Service
                         throw new CrudException(HttpStatusCode.NotFound, "Order Id Is Not Found", "");
 
                     var expiryTime = DateTimeOffset.Now.AddMinutes(2);
-                    _cacheService.SetData<OrderReponseModel>($"Order{id}", model, expiryTime);
+                    _cacheService.SetCacheValue<OrderReponseModel>($"Order{id}", model);
 
                     return new BaseResponseViewModel<OrderReponseModel>()
                     {

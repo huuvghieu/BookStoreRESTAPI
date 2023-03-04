@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ServiceStack.Redis;
+using StackExchange.Redis;
 using System.Text;
 
 using System.Text.Json.Serialization;
@@ -72,15 +73,16 @@ builder.Services.AddAuthentication(x =>
             ValidateAudience = false,
         };
     });
-builder.Services.AddScoped<IBookRepository, BookRepository>();
-builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddAutoMapper(typeof(Mapping));
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = builder.Configuration["RedisConnectionString"];
-    //builder.Configuration.GetConnectionString("RedisConnectionString");
-    options.InstanceName = "SampleInstance";
-});
+//builder.Services.AddStackExchangeRedisCache(options =>
+//{
+//    options.Configuration = builder.Configuration["RedisConnectionString"];
+//    //builder.Configuration.GetConnectionString("RedisConnectionString");
+//    options.InstanceName = "SampleInstance";
+//});
+builder.Services.AddSingleton<IConnectionMultiplexer>(options =>
+    ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("RedisConnection")
+ )); 
 builder.Services.AddControllers().AddJsonOptions(x =>
                 x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
@@ -93,6 +95,8 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IAuthUserService, AuthUserService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReturnOrderService, ReturnOrderService>();
+builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<ICacheService, CacheService>();
 var app = builder.Build();
 
