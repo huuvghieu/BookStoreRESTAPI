@@ -68,19 +68,34 @@ namespace BookStore.Service.Service.ImplService
         {
             try
             {
-                var filter = _mapper.Map<CategoryResponse>(categoryRequest);
+                var cacheData = _cacheService.GetCacheValue<List<CategoryResponse>>($"ListCatePaing{pagingRequest.Page}&{pagingRequest.PageSize}&{pagingRequest.Total}" +
+                                                                                    $"&{pagingRequest.SortDirection}&{pagingRequest.SortProperty}&{categoryRequest.CateName}");
+                if(cacheData == null)
+                {
+                    var filter = _mapper.Map<CategoryResponse>(categoryRequest);
 
-                filter.SortDirection = pagingRequest.SortDirection;
-                filter.SortProperty = pagingRequest.SortProperty;
+                    filter.SortDirection = pagingRequest.SortDirection;
+                    filter.SortProperty = pagingRequest.SortProperty;
 
-                var rsFilter = _unitOfWork.Repository<Category>().GetAll()
-                                .ProjectTo<CategoryResponse>(_mapper.ConfigurationProvider)
-                                .DynamicSort(filter).DynamicFilter(filter)
-                                .PagingQueryable(pagingRequest.Page, pagingRequest.PageSize).Item2;
+                    var rsFilter = _unitOfWork.Repository<Category>().GetAll()
+                                    .ProjectTo<CategoryResponse>(_mapper.ConfigurationProvider)
+                                    .DynamicSort(filter).DynamicFilter(filter)
+                                    .PagingQueryable(pagingRequest.Page, pagingRequest.PageSize).Item2;
+                    cacheData = _mapper.Map<List<CategoryResponse>>(rsFilter);
+                    _cacheService.SetCacheValue($"ListCatePaing{pagingRequest.Page}&{pagingRequest.PageSize}&{pagingRequest.Total}" +
+                                                    $"&{pagingRequest.SortDirection}&{pagingRequest.SortProperty}&{categoryRequest.CateName}", cacheData);
+                    
+                    return new BasePagingViewModel<CategoryResponse>()
+                    {
+                        Metadata = pagingRequest,
+                        Data = rsFilter.ToList()
+                    };
+                }
+
                 return new BasePagingViewModel<CategoryResponse>()
                 {
                     Metadata = pagingRequest,
-                    Data = rsFilter.ToList()
+                    Data = cacheData.ToList()
                 };
 
             }
