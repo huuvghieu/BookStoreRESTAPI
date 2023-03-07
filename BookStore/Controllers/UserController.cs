@@ -41,7 +41,6 @@ namespace BookStore.API.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        [Authorize(Roles = "admin")]
         public async Task<ActionResult<UserResponse>> DeleteUser(int id)
         {
             var rs = await _userService.DeleteUser(id);
