@@ -31,7 +31,7 @@ namespace BookStore.API.Controllers
         }
 
         [HttpPost]
-        //[Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<CategoryResponse>> CreateCategory([FromBody] CategoryRequest categoryRequest)
         {
             var rs = await _categoryService.PostCategory(categoryRequest);
@@ -40,7 +40,7 @@ namespace BookStore.API.Controllers
         }
 
         [HttpPut("{id:int}")]
-        //[Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<CategoryResponse>> UpdateCategory([FromBody] CategoryRequest categoryRequest, int id)
         {
             var rs = await _categoryService.PutCategory(id, categoryRequest);
@@ -49,7 +49,7 @@ namespace BookStore.API.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        //[Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<CategoryResponse>> DeleteCategory(int id)
         {
             var rs = await _categoryService.DeleteCategory(id);
